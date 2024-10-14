@@ -12,7 +12,7 @@ return {{
     },
     config = function()
         require("mason-lspconfig").setup({
-            ensure_installed = {"clangd"}
+            ensure_installed = {"clangd", "fortls", "pyright", "lua_ls"}
         })
     end
 }, {
@@ -26,6 +26,12 @@ return {{
             capabilities = capabilities
         })
         lspconfig.clangd.setup({
+            capabilities = capabilities
+        })
+        lspconfig.fortls.setup({
+            capabilities = capabilities
+        })
+        lspconfig.pyright.setup({
             capabilities = capabilities
         })
 
