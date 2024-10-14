@@ -1,4 +1,3 @@
-lazy-lock.json
-.vscode
 pack
-pack/*
+*.py
+lazy-lock.json
