@@ -6,7 +6,6 @@ set rnu " relative line number
 set textwidth=280
 
 call plug#begin()
-  Plug 'whatyouhide/vim-gotham'
   Plug 'vim-airline/vim-airline'
   Plug 'vim-airline/vim-airline-themes'
   Plug 'ryanoasis/vim-devicons'
@@ -17,13 +16,10 @@ call plug#begin()
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'davidhalter/jedi-vim'
   Plug 'cdelledonne/vim-cmake'
-  Plug 'tranvansang/octave.vim'
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
   Plug 'junegunn/vim-easy-align'
   Plug 'jiangmiao/auto-pairs'
-  Plug 'scrooloose/nerdtree', { 'on':  'NERDTreeToggle' }
-  Plug 'Xuyuanp/nerdtree-git-plugin'
 call plug#end()
 
 xmap ga <Plug>(EasyAlign)
@@ -43,4 +39,3 @@ nnoremap <silent> <C-p> :Files<CR>
 
 " Setting the GUI themes
 set termguicolors
-colorscheme gotham
