@@ -4,23 +4,23 @@ filetype plugin indent on
 set ts=2 sts=2 sw=2 et ai " tab space, soft tab space, shift width, auto indent
 set rnu " relative line number
 set textwidth=280
+set mouse=a
+
+" Setting the leader key <leader> to spacebar
+let mapleader = " "
 
 call plug#begin()
-  Plug 'vim-airline/vim-airline'
-  Plug 'vim-airline/vim-airline-themes'
-  Plug 'ryanoasis/vim-devicons'
-  Plug 'scrooloose/nerdcommenter'
-  Plug 'mg979/vim-visual-multi'
-  Plug 'tpope/vim-surround'
-  Plug 'romainl/vim-cool'
-  Plug 'neoclide/coc.nvim', {'branch': 'release'}
-  Plug 'davidhalter/jedi-vim'
-  Plug 'cdelledonne/vim-cmake'
+  Plug 'ryanoasis/vim-devicons' " Icons pack
+  Plug 'scrooloose/nerdcommenter' " Commenting package for vim
+  Plug 'mg979/vim-visual-multi' " Allows to select multiple lines with ctrl+n
+  Plug 'tpope/vim-surround' " Allows to surround selected text in visual mode with a tag using shift+s
+  Plug 'romainl/vim-cool' " Allows better highlighted search
   Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
   Plug 'junegunn/fzf.vim'
   Plug 'junegunn/vim-easy-align'
-  Plug 'jiangmiao/auto-pairs'
 call plug#end()
+
+let g:NERDCreateDefaultMappings = 1
 
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
@@ -37,5 +37,3 @@ inoremap <silent><expr> <cr> "\<c-g>u\<CR>"
 inoremap <silent><expr> <c-@> coc#refresh()
 nnoremap <silent> <C-p> :Files<CR>
 
-" Setting the GUI themes
-set termguicolors
