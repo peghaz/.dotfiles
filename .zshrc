@@ -3,6 +3,7 @@
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
+export EDITOR=vim
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
@@ -70,7 +71,7 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode z)
+plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode z docker)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -120,3 +121,13 @@ alias neofetch=fastfetch
 . "$HOME/.cargo/env"
 
 if [ "$TMUX" = "" ]; then tmux; fi
+
+# Yazi file browser config
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		builtin cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
+}
