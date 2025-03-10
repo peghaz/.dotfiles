@@ -1,3 +1,4 @@
 [manager]
-ratio = [0, 4, 3]
+ratio = [0, 1, 1]
 mouse_events = ["click", "scroll", "touch", "move", "drag"]
+show_hidden = true
