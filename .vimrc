@@ -2,7 +2,8 @@ syntax on
 filetype plugin indent on
 
 set ts=2 sts=2 sw=2 et ai " tab space, soft tab space, shift width, auto indent
-set rnu " relative line number
+set number                     " Show current line number
+set relativenumber             " Show relative line numbers
 set textwidth=280
 set mouse=a
 
