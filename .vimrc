@@ -7,6 +7,14 @@ set relativenumber             " Show relative line numbers
 set textwidth=280
 set mouse=a
 
+" Map Ctrl+S to save the current file
+nnoremap <C-s> :w<CR>
+inoremap <C-s> <Esc>:w<CR>a
+
+" Map Ctrl+Q to quit Vim
+nnoremap <C-q> :q<CR>
+inoremap <C-q> <Esc>:q<CR>
+
 " Setting the leader key <leader> to spacebar
 let mapleader = " "
 
