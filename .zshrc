@@ -111,6 +111,7 @@ export PATH="$HOME/.local/bin:$PATH"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias neofetch=fastfetch
+alias cat=bat
 
 . "$HOME/.cargo/env"
 
