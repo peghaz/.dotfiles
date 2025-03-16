@@ -110,18 +110,16 @@ export PATH="$HOME/.local/bin:$PATH"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+alias neofetch=fastfetch
+
+. "$HOME/.cargo/env"
+
 # fnm
 FNM_PATH="/home/mehdi/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
   export PATH="/home/mehdi/.local/share/fnm:$PATH"
   eval "`fnm env`"
 fi
-
-alias neofetch=fastfetch
-
-. "$HOME/.cargo/env"
-
-if [ "$TMUX" = "" ]; then tmux; fi
 
 # Yazi file browser config
 function y() {
@@ -132,3 +130,5 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
+
+if [ "$TMUX" = "" ]; then tmux; fi
