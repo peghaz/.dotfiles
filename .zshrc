@@ -132,3 +132,19 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/mehdi/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/mehdi/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/mehdi/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/mehdi/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
