@@ -110,17 +110,17 @@ export PATH="$HOME/.local/bin:$PATH"
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+alias neofetch=fastfetch
+alias cat=bat
+
+. "$HOME/.cargo/env"
+
 # fnm
 FNM_PATH="/home/mehdi/.local/share/fnm"
 if [ -d "$FNM_PATH" ]; then
   export PATH="/home/mehdi/.local/share/fnm:$PATH"
   eval "`fnm env`"
 fi
-
-alias neofetch=fastfetch
-
-. "$HOME/.cargo/env"
-
 
 # Yazi file browser config
 function y() {
