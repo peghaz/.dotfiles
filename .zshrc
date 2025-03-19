@@ -121,7 +121,6 @@ alias neofetch=fastfetch
 
 . "$HOME/.cargo/env"
 
-if [ "$TMUX" = "" ]; then tmux; fi
 
 # Yazi file browser config
 function y() {
@@ -148,3 +147,4 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+if [ "$TMUX" = "" ]; then tmux; fi
