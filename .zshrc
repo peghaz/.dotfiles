@@ -124,6 +124,8 @@ if [ -d "$FNM_PATH" ]; then
   eval "`fnm env`"
 fi
 
+if [ "$TMUX" = "" ]; then tmux; fi
+
 # Yazi file browser config
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
@@ -149,4 +151,3 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-if [ "$TMUX" = "" ]; then tmux; fi
