@@ -113,6 +113,7 @@ export PATH="$HOME/.local/bin:$PATH"
 alias neofetch=fastfetch
 alias cat=bat
 
+chmod u+x ~/.custom_scripts/init_ml_project.sh
 alias init_ml_project="~/.custom_scripts/init_ml_project.sh"
 
 . "$HOME/.cargo/env"
