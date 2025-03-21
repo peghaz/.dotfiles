@@ -77,12 +77,9 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode z docker)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-export PATH="/usr/local/cuda-12.8/bin:$PATH"
+export PATH="$PATH:$HOME/.local/bin:/usr/local/cuda-12.8/bin:/usr/local/go/bin"
 export LD_LIBRARY_PATH="/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH"
 
-export PATH="/usr/local/go/bin:$PATH"
-
-export PATH="$HOME/.local/bin:$PATH"
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -111,7 +108,9 @@ export PATH="$HOME/.local/bin:$PATH"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 alias neofetch=fastfetch
-alias cat=bat
+
+chmod u+x ~/.custom_scripts/init_ml_project.sh
+alias init_ml_project="~/.custom_scripts/init_ml_project.sh"
 
 . "$HOME/.cargo/env"
 
@@ -122,6 +121,8 @@ if [ -d "$FNM_PATH" ]; then
   eval "`fnm env`"
 fi
 
+if [ "$TMUX" = "" ]; then tmux; fi
+
 # Yazi file browser config
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
@@ -131,9 +132,20 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
-
-if [ "$TMUX" = "" ]; then tmux; fi
-
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/mehdi/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/mehdi/miniconda3/etc/profile.d/conda.sh" ]; then
+        . "/home/mehdi/miniconda3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/mehdi/miniconda3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
 
 # Load Angular CLI autocompletion.
 source <(ng completion script)
