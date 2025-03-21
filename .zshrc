@@ -147,11 +147,7 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-<<<<<<< HEAD
-=======
 if [ "$TMUX" = "" ]; then tmux; fi
-
 
 # Load Angular CLI autocompletion.
 source <(ng completion script)
->>>>>>> 2a9dbc4 (Added keyboard input remapper config)
