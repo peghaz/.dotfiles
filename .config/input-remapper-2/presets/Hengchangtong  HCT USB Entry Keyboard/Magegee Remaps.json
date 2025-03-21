@@ -193,23 +193,6 @@
         "input_combination": [
             {
                 "type": 1,
-                "code": 100,
-                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
-            },
-            {
-                "type": 1,
-                "code": 5,
-                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
-            }
-        ],
-        "target_uinput": "keyboard",
-        "output_symbol": "KEY_RIGHTALT+KEY_F4",
-        "mapping_type": "key_macro"
-    },
-    {
-        "input_combination": [
-            {
-                "type": 1,
                 "code": 56,
                 "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
             },
@@ -377,6 +360,23 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "KEY_RIGHT",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 56,
+                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
+            },
+            {
+                "type": 1,
+                "code": 5,
+                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "KEY_RIGHTALT+KEY_F4",
         "mapping_type": "key_macro"
     }
 ]
