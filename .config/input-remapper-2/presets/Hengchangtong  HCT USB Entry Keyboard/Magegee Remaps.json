@@ -115,7 +115,7 @@
             }
         ],
         "target_uinput": "keyboard",
-        "output_symbol": "KEY_HOME",
+        "output_symbol": "KEY_",
         "mapping_type": "key_macro"
     },
     {
@@ -150,6 +150,40 @@
         ],
         "target_uinput": "keyboard",
         "output_symbol": "KEY_GRAVE",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 29,
+                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
+            },
+            {
+                "type": 1,
+                "code": 1,
+                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "KEY_LEFTCTRL+KEY_GRAVE",
+        "mapping_type": "key_macro"
+    },
+    {
+        "input_combination": [
+            {
+                "type": 1,
+                "code": 42,
+                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
+            },
+            {
+                "type": 1,
+                "code": 1,
+                "origin_hash": "eb63af98eeac228e4b643472d1c1849b"
+            }
+        ],
+        "target_uinput": "keyboard",
+        "output_symbol": "KEY_LEFTSHIFT+KEY_GRAVE",
         "mapping_type": "key_macro"
     }
 ]
