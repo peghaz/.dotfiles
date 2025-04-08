@@ -77,8 +77,8 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode z docker)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-export PATH="$PATH:$HOME/.local/bin:/usr/local/cuda-12.8/bin:/usr/local/go/bin"
-export LD_LIBRARY_PATH="/usr/local/cuda-12.8/lib64:$LD_LIBRARY_PATH"
+export PATH="$PATH:$HOME/.local/bin:/usr/local/cuda/bin:/usr/local/go/bin"
+export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -149,5 +149,13 @@ unset __conda_setup
 
 if [ "$TMUX" = "" ]; then tmux; fi
 
-# Load Angular CLI autocompletion.
-source <(ng completion script)
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+# fnm
+FNM_PATH="/home/mehdi/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="/home/mehdi/.local/share/fnm:$PATH"
+  eval "`fnm env`"
+fi
