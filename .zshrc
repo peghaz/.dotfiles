@@ -80,6 +80,9 @@ source $ZSH/oh-my-zsh.sh
 export PATH="$PATH:$HOME/.local/bin:/usr/local/cuda/bin:/usr/local/go/bin"
 export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
 
+export VCPKG_ROOT="/home/mehdi/vcpkg"
+export PATH=$VCPKG_ROOT:$PATH
+
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -114,14 +117,6 @@ alias init_ml_project="~/.custom_scripts/init_ml_project.sh"
 
 . "$HOME/.cargo/env"
 
-# fnm
-FNM_PATH="/home/mehdi/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="/home/mehdi/.local/share/fnm:$PATH"
-  eval "`fnm env`"
-fi
-
-if [ "$TMUX" = "" ]; then tmux; fi
 
 # Yazi file browser config
 function y() {
@@ -147,8 +142,6 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-# Load Angular CLI autocompletion.
-source <(ng completion script)
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
@@ -160,3 +153,8 @@ if [ -d "$FNM_PATH" ]; then
   export PATH="/home/mehdi/.local/share/fnm:$PATH"
   eval "`fnm env`"
 fi
+
+# Load Angular CLI autocompletion.
+source <(ng completion script)
+
+if [ "$TMUX" = "" ]; then tmux; fi
