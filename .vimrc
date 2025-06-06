@@ -32,12 +32,13 @@ call plug#begin()
   Plug 'junegunn/vim-easy-align'
   Plug 'neoclide/coc.nvim', {'branch': 'release'}
   Plug 'ctrlpvim/ctrlp.vim'
-  Plug 'dracula/dracula-theme'
   Plug 'vim-airline/vim-airline'
   Plug 'catppuccin/vim', { 'as': 'catppuccin' }
+  Plug 'whatyouhide/vim-gotham'
 call plug#end()
 
 colorscheme catppuccin_mocha
+" colorscheme gotham
 
 
 
