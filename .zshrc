@@ -77,8 +77,8 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode z docker)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-export PATH="$PATH:$HOME/.local/bin:/usr/local/cuda/bin:/usr/local/go/bin"
-export LD_LIBRARY_PATH="/usr/local/cuda/lib64:$LD_LIBRARY_PATH"
+export PATH="$HOME/.local/bin:/usr/local/cuda/bin:/usr/local/go/bin:$PATH"
+export LD_LIBRARY_PATH="/usr/local/cuda/lib64"
 
 export VCPKG_ROOT="/home/mehdi/vcpkg"
 export PATH=$VCPKG_ROOT:$PATH
@@ -156,5 +156,9 @@ fi
 
 # Load Angular CLI autocompletion.
 source <(ng completion script)
+
+# ? Adding TensorRT to the PATH
+export LD_LIBRARY_PATH="/usr/local/share/TensorRT/lib:$LD_LIBRARY_PATH"
+export PATH="/usr/local/share/TensorRT/bin:$PATH"
 
 if [ "$TMUX" = "" ]; then tmux; fi
