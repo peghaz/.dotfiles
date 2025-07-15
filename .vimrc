@@ -12,7 +12,7 @@ filetype plugin on
 
 " Map Ctrl+S to save the current file
 nnoremap <C-s> :w<CR>
-inoremap <C-s> <Esc>:w<CR>a
+
 
 " Map Ctrl+Q to quit Vim
 nnoremap <C-q> :q<CR>
@@ -35,13 +35,16 @@ call plug#begin()
   Plug 'vim-airline/vim-airline'
   Plug 'catppuccin/vim', { 'as': 'catppuccin' }
   Plug 'whatyouhide/vim-gotham'
+  Plug 'airblade/vim-rooter'
+  Plug 'preservim/nerdtree'
+  Plug 'morhetz/gruvbox'
 call plug#end()
 
 colorscheme catppuccin_mocha
 " colorscheme gotham
-
-
-
+set background=dark
+" colorscheme gruvbox
+highlight Normal ctermbg=NONE guibg=NONE
 
 let g:NERDCreateDefaultMappings = 1
 
@@ -177,6 +180,8 @@ if has('nvim-0.4.0') || has('patch-8.2.0750')
   vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
   vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
 endif
+
+nnoremap <C-e> :NERDTreeToggle<CR>
 
 " Use CTRL-S for selections ranges
 " Requires 'textDocument/selectionRange' support of language server
