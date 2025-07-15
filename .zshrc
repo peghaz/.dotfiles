@@ -9,7 +9,7 @@ export EDITOR=vim
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="fishy"
+ZSH_THEME="bira"
 # ? My favorite choices: fishy, minimal, robbyrussell
 
 # Set list of themes to pick from when loading at random
@@ -83,6 +83,8 @@ export LD_LIBRARY_PATH="/usr/local/cuda/lib64"
 export VCPKG_ROOT="/home/mehdi/vcpkg"
 export PATH=$VCPKG_ROOT:$PATH
 
+export PATH="/usr/local/texlive/2025/bin/x86_64-linux:$PATH"
+
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -127,21 +129,6 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/mehdi/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/mehdi/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/mehdi/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/mehdi/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
-
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
 export SDKMAN_DIR="$HOME/.sdkman"
@@ -161,4 +148,34 @@ source <(ng completion script)
 export LD_LIBRARY_PATH="/usr/local/share/TensorRT/lib:$LD_LIBRARY_PATH"
 export PATH="/usr/local/share/TensorRT/bin:$PATH"
 
-if [ "$TMUX" = "" ]; then tmux; fi
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+__conda_setup="$('/home/mehdi/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    if [ -f "/home/mehdi/miniforge3/etc/profile.d/conda.sh" ]; then
+        . "/home/mehdi/miniforge3/etc/profile.d/conda.sh"
+    else
+        export PATH="/home/mehdi/miniforge3/bin:$PATH"
+    fi
+fi
+unset __conda_setup
+# <<< conda initialize <<<
+
+
+# >>> mamba initialize >>>
+# !! Contents within this block are managed by 'mamba shell init' !!
+export MAMBA_EXE='/home/mehdi/miniforge3/bin/mamba';
+export MAMBA_ROOT_PREFIX='/home/mehdi/miniforge3';
+__mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__mamba_setup"
+else
+    alias mamba="$MAMBA_EXE"  # Fallback on help from mamba activate
+fi
+unset __mamba_setup
+# <<< mamba initialize <<<
+
+
