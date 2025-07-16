@@ -9,7 +9,7 @@ export EDITOR=vim
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="bira"
+ZSH_THEME="fishy"
 # ? My favorite choices: fishy, minimal, robbyrussell
 
 # Set list of themes to pick from when loading at random
@@ -76,15 +76,6 @@ plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-vi-mode z docker)
 
 source $ZSH/oh-my-zsh.sh
 
-# User configuration
-export PATH="$HOME/.local/bin:/usr/local/cuda/bin:/usr/local/go/bin:$PATH"
-export LD_LIBRARY_PATH="/usr/local/cuda/lib64"
-
-export VCPKG_ROOT="/home/mehdi/vcpkg"
-export PATH=$VCPKG_ROOT:$PATH
-
-export PATH="/usr/local/texlive/2025/bin/x86_64-linux:$PATH"
-
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -117,9 +108,6 @@ alias neofetch=fastfetch
 chmod u+x ~/.custom_scripts/init_ml_project.sh
 alias init_ml_project="~/.custom_scripts/init_ml_project.sh"
 
-. "$HOME/.cargo/env"
-
-
 # Yazi file browser config
 function y() {
 	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
@@ -129,25 +117,6 @@ function y() {
 	fi
 	rm -f -- "$tmp"
 }
-
-#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
-export SDKMAN_DIR="$HOME/.sdkman"
-[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
-
-# fnm
-FNM_PATH="/home/mehdi/.local/share/fnm"
-if [ -d "$FNM_PATH" ]; then
-  export PATH="/home/mehdi/.local/share/fnm:$PATH"
-  eval "`fnm env`"
-fi
-
-# Load Angular CLI autocompletion.
-source <(ng completion script)
-
-# ? Adding TensorRT to the PATH
-export LD_LIBRARY_PATH="/usr/local/share/TensorRT/lib:$LD_LIBRARY_PATH"
-export PATH="/usr/local/share/TensorRT/bin:$PATH"
-
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -179,3 +148,10 @@ unset __mamba_setup
 # <<< mamba initialize <<<
 
 
+
+# fnm
+FNM_PATH="/home/mehdi/.local/share/fnm"
+if [ -d "$FNM_PATH" ]; then
+  export PATH="/home/mehdi/.local/share/fnm:$PATH"
+  eval "`fnm env`"
+fi

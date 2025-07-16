@@ -1,3 +1,4 @@
 .config/yazi/flavors
 .config/yazi/plugins
 .vscode
+node_modules
