@@ -38,6 +38,7 @@ call plug#begin()
   Plug 'airblade/vim-rooter'
   Plug 'preservim/nerdtree'
   Plug 'morhetz/gruvbox'
+  Plug 'mattn/emmet-vim'
 call plug#end()
 
 colorscheme catppuccin_mocha
