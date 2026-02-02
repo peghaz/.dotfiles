@@ -13,10 +13,29 @@ antigen bundle jeffreytse/zsh-vi-mode
 antigen bundle docker
 antigen bundle zsh-users/zsh-history-substring-search
 antigen bundle rupa/z
+antigen bundle wting/autojump
+antigen bundle changyuheng/fz
 antigen bundle djui/alias-tips
-antigen bundle zsh-users/zsh-syntax-highlighting
+antigen bundle hlissner/zsh-autopair    # Auto-close brackets/quotes
+antigen bundle zdharma-continuum/fast-syntax-highlighting
 antigen bundle zsh-users/zsh-autosuggestions
 antigen bundle zsh-users/zsh-completions
+antigen bundle colored-man-pages
+
+# ? System management
+antigen bundle python
+antigen bundle sudo
+antigen bundle safe-paste
+antigen bundle last-working-dir
+
+
+# ? File managemet
+antigen bundle cp
+antigen bundle rsync
+antigen bundle mv
+antigen bundle fd
+antigen bundle ripgrep
+
 
 # Load the theme.
 antigen theme bira
