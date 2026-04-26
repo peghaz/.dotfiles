@@ -39,6 +39,7 @@ call plug#begin()
   Plug 'preservim/nerdtree'
   Plug 'morhetz/gruvbox'
   Plug 'mattn/emmet-vim'
+  Plug 'evanleck/vim-svelte', {'branch': 'main'}
 call plug#end()
 
 colorscheme catppuccin_mocha
