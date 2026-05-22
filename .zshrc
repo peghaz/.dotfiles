@@ -56,9 +56,8 @@ export LD_LIBRARY_PATH="/usr/local/cuda/lib64"
 export VCPKG_ROOT="/home/mehdi/vcpkg"
 export PATH=$VCPKG_ROOT:$PATH
 
-# ? Adding TensorRT to the PATH
-export LD_LIBRARY_PATH="/usr/local/TensorRT/lib:$LD_LIBRARY_PATH"
-export PATH="/usr/local/TensorRT/bin:$PATH"
+export PATH="$PATH:/opt/nvim-linux-x86_64/bin/"
+
 
 # Yazi file browser config
 function y() {
@@ -71,6 +70,9 @@ function y() {
 }
 
 
+# OCaml
+[[ ! -r '/home/mehdi/.opam/opam-init/init.zsh' ]] || source '/home/mehdi/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 __conda_setup="$('/home/mehdi/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
@@ -82,6 +84,10 @@ else
     else
         export PATH="/home/mehdi/miniforge3/bin:$PATH"
     fi
+    mkdir -p "$CONDA_PREFIX/etc/conda/activate.d"
+    cat > "$CONDA_PREFIX/etc/conda/activate.d/terminal_fix.sh" <<'EOF'
+    alias clear=/usr/bin/clear
+EOF
 fi
 unset __conda_setup
 # <<< conda initialize <<<
@@ -90,7 +96,7 @@ unset __conda_setup
 # >>> mamba initialize >>>
 # !! Contents within this block are managed by 'mamba shell init' !!
 export MAMBA_EXE='/home/mehdi/miniforge3/bin/mamba';
-export MAMBA_ROOT_PREFIX='/home/mehdi/miniforge3';
+export MAMBA_ROOT_PREFIX='zsh';
 __mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
 if [ $? -eq 0 ]; then
     eval "$__mamba_setup"
@@ -100,10 +106,6 @@ fi
 unset __mamba_setup
 # <<< mamba initialize <<<
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-export PATH="$PATH:/opt/nvim-linux-x86_64/bin"
 
-alias activate_ghcup='[ -f "/home/mehdi/.ghcup/env" ] && . "/home/mehdi/.ghcup/env"' # ghcup-env
+alias s='kitten ssh'

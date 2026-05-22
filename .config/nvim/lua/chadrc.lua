@@ -6,7 +6,7 @@
 local M = {}
 
 M.base46 = {
-	theme = "github_light",
+	theme = "github_dark",
 	theme_toggle = { "github_dark", "github_light" },
 
 	-- hl_override = {
