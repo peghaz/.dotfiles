@@ -10,7 +10,6 @@ antigen bundle fzf
 antigen bundle lein
 antigen bundle command-not-found
 antigen bundle jeffreytse/zsh-vi-mode
-antigen bundle docker
 antigen bundle zsh-users/zsh-history-substring-search
 antigen bundle rupa/z
 antigen bundle wting/autojump
@@ -107,5 +106,5 @@ unset __mamba_setup
 # <<< mamba initialize <<<
 
 
-
+alias vim=nvim
 alias s='kitten ssh'
