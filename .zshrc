@@ -20,6 +20,7 @@ antigen bundle zdharma-continuum/fast-syntax-highlighting
 antigen bundle zsh-users/zsh-autosuggestions
 antigen bundle zsh-users/zsh-completions
 antigen bundle colored-man-pages
+antigen bundle Aloxaf/fzf-tab
 
 # ? System management
 antigen bundle python
@@ -39,8 +40,46 @@ antigen bundle ripgrep
 # Load the theme.
 antigen theme bira
 
+fpath=("$HOME/.zsh/completions" $fpath)
+
 # Tell Antigen that you're done.
 antigen apply
+
+# Fish-like Zsh completion
+
+autoload -Uz compinit
+compinit
+
+zmodload zsh/complist
+
+setopt COMPLETE_IN_WORD
+setopt ALWAYS_TO_END
+setopt AUTO_MENU
+setopt NO_BEEP
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path ~/.zsh/cache
+
+zstyle ':completion:*' matcher-list \
+  'm:{a-zA-Z}={A-Za-z}' \
+  'r:|[._-]=* r:|=*' \
+  'l:|=* r:|=*'
+
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+zstyle ':completion:*:warnings' format '%F{red}-- no matches found --%f'
+
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=8'
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_USE_ASYNC=true
+
+zstyle ':fzf-tab:*' show-group full
+zstyle ':fzf-tab:*' switch-group '<' '>'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color=always $realpath'
 
 mkdir -p ~/.antigen/bundles/robbyrussell/oh-my-zsh/cache/completions
 mkdir -p ~/.oh-my-zsh/cache/completions
@@ -56,17 +95,6 @@ export VCPKG_ROOT="/home/mehdi/vcpkg"
 export PATH=$VCPKG_ROOT:$PATH
 
 export PATH="$PATH:/opt/nvim-linux-x86_64/bin/"
-
-
-# Yazi file browser config
-function y() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
-}
 
 
 # OCaml
@@ -91,7 +119,6 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
-
 # >>> mamba initialize >>>
 # !! Contents within this block are managed by 'mamba shell init' !!
 export MAMBA_EXE='/home/mehdi/miniforge3/bin/mamba';
@@ -105,6 +132,15 @@ fi
 unset __mamba_setup
 # <<< mamba initialize <<<
 
-
 alias vim=nvim
 alias s='kitten ssh'
+
+# Yazi file browser config
+function y() {
+  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+  yazi "$@" --cwd-file="$tmp"
+  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+    builtin cd -- "$cwd"
+  fi
+  rm -f -- "$tmp"
+}
