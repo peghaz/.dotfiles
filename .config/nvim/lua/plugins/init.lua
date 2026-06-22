@@ -13,6 +13,12 @@ return {
     end,
   },
 
+  {
+    "github/copilot.vim",
+    cmd = "Copilot",
+    event = "InsertEnter",
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 
