@@ -53,6 +53,34 @@ return {
   },
 
   {
+    "nvim-tree/nvim-web-devicons",
+    opts = function(_, opts)
+      local custom = require "configs.devicons"
+
+      opts.override = vim.tbl_deep_extend("force", opts.override or {}, custom.override)
+      opts.override_by_filename = vim.tbl_deep_extend(
+        "force",
+        opts.override_by_filename or {},
+        custom.override_by_filename
+      )
+      opts.override_by_extension = vim.tbl_deep_extend(
+        "force",
+        opts.override_by_extension or {},
+        custom.override_by_extension
+      )
+
+      return opts
+    end,
+  },
+
+  {
+    "nvim-tree/nvim-tree.lua",
+    opts = function(_, opts)
+      return vim.tbl_deep_extend("force", opts or {}, require "configs.nvimtree")
+    end,
+  },
+
+  {
     "kdheepak/lazygit.nvim",
     cmd = {
       "LazyGit",
@@ -63,8 +91,29 @@ return {
     dependencies = { "nvim-lua/plenary.nvim" },
   },
 
+  {
+    "mfussenegger/nvim-dap",
+    lazy = false,
+    dependencies = {
+      "rcarriga/cmp-dap",
+      "nvim-neotest/nvim-nio",
+      "rcarriga/nvim-dap-ui",
+      "mfussenegger/nvim-dap-python",
+    },
+    config = function()
+      require "configs.dap"
+    end,
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
+
+  {
+    "hrsh7th/nvim-cmp",
+    opts = function()
+      return require "configs.cmp"
+    end,
+  },
 
   {
     "nvim-treesitter/nvim-treesitter",
@@ -76,6 +125,9 @@ return {
         "rust",
         "go", "gomod", "gosum",
         "python",
+        "markdown", "markdown_inline",
+        "yaml",
+        "json", "jsonc",
         "dockerfile",
         "toml",
         "bash",

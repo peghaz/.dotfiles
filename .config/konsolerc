@@ -31,6 +31,9 @@ State=AAAA/wAAAAD9AAAAAAAAB4AAAAQAAAABAAAAAQAAAAIAAAACPwAAAAA
 MenuBar=Disabled
 ShowMenuBar=true
 
+[Notification Messages]
+CloseSingleTab=true
+
 [Plugins]
 QuickCommandsEnabled=false
 SSHManagerEnabled=true
