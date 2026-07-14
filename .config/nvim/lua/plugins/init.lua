@@ -113,7 +113,6 @@ return {
     "mfussenegger/nvim-dap",
     lazy = false,
     dependencies = {
-      "rcarriga/cmp-dap",
       "nvim-neotest/nvim-nio",
       "rcarriga/nvim-dap-ui",
       "mfussenegger/nvim-dap-python",
@@ -128,6 +127,11 @@ return {
 
   {
     "hrsh7th/nvim-cmp",
+    -- cmp-dap must depend on nvim-cmp, not nvim-dap: nvim-dap is `lazy = false`, and
+    -- cmp-dap's after/plugin requires "cmp", which would force-load nvim-cmp during
+    -- lazy's init phase. lazy only sources a plugin's after/plugin once init is done,
+    -- so every cmp source (nvim_lsp, buffer, luasnip, nvim_lua) would silently never register.
+    dependencies = { "rcarriga/cmp-dap" },
     opts = function()
       return require "configs.cmp"
     end,
