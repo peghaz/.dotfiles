@@ -2,7 +2,7 @@ local cmp = require "cmp"
 local options = require "nvchad.configs.cmp"
 
 options.enabled = function()
-  if vim.api.nvim_buf_get_option(0, "buftype") ~= "prompt" then
+  if vim.bo.buftype ~= "prompt" then
     return true
   end
 

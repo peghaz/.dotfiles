@@ -8,8 +8,26 @@ return {
   -- These are some examples, uncomment them if you want to see them work!
   {
     "neovim/nvim-lspconfig",
+    lazy = false,
+    dependencies = {
+      "mason-org/mason-lspconfig.nvim",
+    },
     config = function()
       require "configs.lspconfig"
+    end,
+  },
+
+  {
+    "mason-org/mason-lspconfig.nvim",
+    lazy = false,
+    dependencies = {
+      "mason-org/mason.nvim",
+    },
+    opts = function()
+      return {
+        ensure_installed = require "configs.lsp_servers",
+        automatic_installation = true,
+      }
     end,
   },
 
