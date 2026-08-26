@@ -98,7 +98,7 @@ export PATH="$PATH:/opt/nvim-linux-x86_64/bin/"
 
 
 # OCaml
-[[ ! -r '/home/mehdi/.opam/opam-init/init.zsh' ]] || source '/home/mehdi/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
+# [[ ! -r '/home/mehdi/.opam/opam-init/init.zsh' ]] || source '/home/mehdi/.opam/opam-init/init.zsh' > /dev/null 2> /dev/null
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
@@ -135,12 +135,15 @@ unset __mamba_setup
 alias vim=nvim
 alias s='kitten ssh'
 
-# Yazi file browser config
-function y() {
-  local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
-  yazi "$@" --cwd-file="$tmp"
-  if cwd="$(command cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-    builtin cd -- "$cwd"
-  fi
-  rm -f -- "$tmp"
-}
+# ! zsh functions
+
+fpath=(~/.zsh_functions $fpath)
+autoload -Uz md2pdf
+
+fpath+=~/.zfunc; autoload -Uz compinit; compinit
+
+# >>> grok installer >>>
+export PATH="$HOME/.grok/bin:$PATH"
+fpath=(~/.grok/completions/zsh $fpath)
+autoload -Uz compinit && compinit -C
+# <<< grok installer <<<
