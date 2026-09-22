@@ -1,451 +1,402 @@
-# NvChad User Config Guide
+# Neovim Configuration Guide
 
-This repository is a user-layer Neovim configuration built on top of NvChad.
+This is a personal [NvChad](https://nvchad.com/) user configuration managed as part of a GNU Stow dotfiles repository. It keeps NvChad's defaults and adds language tooling, automatic formatting, a GitHub light/dark theme pair, and extra Treesitter parsers.
 
-The goal of this README is to give you:
+The `<leader>` key is **Space** throughout this guide.
 
-1. A fast path to productivity in a few minutes.
-2. A full reference for keymaps and features.
-3. A deep, practical debugging guide (DAP), including launch.json workflow and completion behavior.
+## Contents
 
-## Table Of Contents
+1. [What is included](#what-is-included)
+2. [Prerequisites](#prerequisites)
+3. [Installation and first launch](#installation-and-first-launch)
+4. [How the configuration is organized](#how-the-configuration-is-organized)
+5. [Daily navigation](#daily-navigation)
+6. [Editing and completion](#editing-and-completion)
+7. [Formatting](#formatting)
+8. [Language servers](#language-servers)
+9. [Treesitter](#treesitter)
+10. [Git integration](#git-integration)
+11. [Appearance and themes](#appearance-and-themes)
+12. [Maintenance and customization](#maintenance-and-customization)
+13. [Troubleshooting](#troubleshooting)
 
-1. What This Setup Is
-2. Quick Start
-3. Architecture And File Layout
-4. Installed Features
-5. Keymaps Reference
-6. Language Tooling Matrix
-7. File Explorer And Icons
-8. Git Workflow
-9. Copilot Workflow
-10. DAP Deep Guide
-11. DAP Troubleshooting
-12. Maintenance Notes
+## What is included
 
-## What This Setup Is
+- NvChad 2.5 as the base configuration and UI
+- lazy.nvim for plugin management
+- NvimTree for browsing project files
+- Telescope for files, text, buffers, help, marks, and Git searches
+- nvim-cmp, LuaSnip, friendly-snippets, and autopairs for completion
+- Neovim LSP support with Mason available for installing external tools
+- Conform for manual and format-on-save formatting
+- Treesitter parsers for the configured development languages
+- Gitsigns for Git change indicators
+- Integrated horizontal, vertical, and floating terminals
+- GitHub dark and light themes with a one-key toggle
 
-This config uses NvChad as a base and applies custom behavior from the user files in the lua directory.
+## Prerequisites
 
-Primary characteristics:
+Install the following before starting:
 
-1. NvChad core defaults stay intact where possible.
-2. User keymaps and plugin overrides are layered on top.
-3. Debugging is first-class with nvim-dap, nvim-dap-ui, nvim-dap-python, and launch.json support.
+- **Neovim 0.11 or newer**
+- **Git**, used to bootstrap lazy.nvim and download plugins
+- **GNU Stow**, used by the parent dotfiles repository
+- A **Nerd Font**, needed for file, statusline, and diagnostic icons
+- **ripgrep (`rg`)**, recommended for Telescope live grep
+- A system clipboard provider such as `xclip`, `xsel`, or `wl-clipboard` on Linux
 
-## Quick Start
+Language servers and formatters are separate command-line programs. Install only the ones needed for the languages you use; the relevant names are listed later in this guide.
 
-### 1) First Open
+## Installation and first launch
 
-Open Neovim in your project root. On first start, plugins sync automatically via lazy.nvim.
+This configuration is stored under `.config/nvim` in the parent dotfiles repository and linked into the home directory with GNU Stow.
 
-Recommended immediate checks:
+### 1. Back up an existing configuration
 
-1. Run :Lazy to verify plugin status.
-2. Run :checkhealth for environment checks.
+If `~/.config/nvim` already exists, move it somewhere safe before applying these dotfiles:
 
-### 2) Core Daily Keys
+```bash
+mv ~/.config/nvim ~/.config/nvim.backup
+```
 
-1. Find files: leader ff (NvChad default)
-2. Live grep: leader fw (NvChad default)
-3. Toggle file browser float: leader o
-4. Workspace symbols: Ctrl+t
-5. Go to definition: F12
+Also consider backing up `~/.local/share/nvim`, `~/.local/state/nvim`, and `~/.cache/nvim` if replacing another Neovim distribution.
 
-### 3) Debug Fast Path
+### 2. Clone and stow the dotfiles
 
-1. Open or create launch file: leader d j
-2. Set breakpoint on current line: F9
-3. Start/continue debug: F5
-4. Step over: F10
-5. Step into: F11
-6. Step out: Shift+F11
-7. Stop debug: Shift+F5
-8. Toggle DAP UI: leader d u
+```bash
+git clone https://github.com/peghaz/.dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+stow .
+```
 
-## Architecture And File Layout
+Stow creates `~/.config/nvim` as links to the files in the repository.
 
-Core config entry points:
+### 3. Start Neovim
 
-1. init.lua: bootstraps lazy.nvim, loads NvChad, then user modules.
-2. lua/plugins/init.lua: plugin additions and plugin option overrides.
-3. lua/mappings.lua: user keymaps.
-4. lua/configs/*: feature-specific behavior (DAP, CMP, LSP, formatters, icons, tree).
+```bash
+nvim
+```
 
-Important user config files:
+On the first launch, `init.lua` clones lazy.nvim when necessary. lazy.nvim then installs the pinned NvChad and plugin dependencies. After installation:
 
-1. [lua/plugins/init.lua](lua/plugins/init.lua)
-2. [lua/mappings.lua](lua/mappings.lua)
-3. [lua/configs/dap.lua](lua/configs/dap.lua)
-4. [lua/configs/cmp.lua](lua/configs/cmp.lua)
-5. [lua/configs/lspconfig.lua](lua/configs/lspconfig.lua)
-6. [lua/configs/conform.lua](lua/configs/conform.lua)
-7. [lua/configs/devicons.lua](lua/configs/devicons.lua)
-8. [lua/configs/nvimtree.lua](lua/configs/nvimtree.lua)
+1. Run `:Lazy` and confirm that the plugins are installed.
+2. Run `:Mason` to install language servers and related tools.
+3. Run `:checkhealth` to inspect Neovim, providers, clipboard support, and plugins.
+4. Restart Neovim after the initial installation.
 
-## Installed Features
+The committed `lazy-lock.json` pins plugin revisions so that installations remain reproducible.
 
-### UI, Editing, Navigation
+## How the configuration is organized
 
-1. NvChad base UI and defaults
-2. Treesitter grammar support for configured languages
-3. Oil floating file manager
-4. NvimTree with custom rendering options
-5. Extended devicons overrides
+Startup follows this sequence:
 
-### Completion
+1. `init.lua` sets Space as the leader key and bootstraps lazy.nvim.
+2. lazy.nvim loads NvChad 2.5 and the user plugin specifications.
+3. NvChad generates and loads its theme and statusline highlights.
+4. `lua/options.lua` and `lua/autocmds.lua` load the NvChad defaults.
+5. `lua/mappings.lua` loads NvChad mappings and applies local additions.
 
-1. nvim-cmp via NvChad
-2. DAP completion via cmp-dap in debug buffers
+The main customization points are:
 
-### AI
+| Path | Purpose |
+| --- | --- |
+| `lua/chadrc.lua` | Theme and NvChad UI choices |
+| `lua/plugins/init.lua` | Added plugins and overrides of NvChad plugin options |
+| `lua/mappings.lua` | User-defined mappings layered over NvChad defaults |
+| `lua/configs/lspconfig.lua` | Enabled language servers |
+| `lua/configs/conform.lua` | Formatter selection and format-on-save behavior |
+| `lua/configs/lazy.lua` | lazy.nvim UI and runtime-path settings |
+
+## Daily navigation
+
+### Discover mappings
+
+Press Space and pause to open WhichKey. It displays available mapping groups and is the easiest way to discover NvChad commands.
+
+| Key | Mode | Action |
+| --- | --- | --- |
+| `<leader>ch` | Normal | Open the NvChad cheatsheet |
+| `<leader>wK` | Normal | Show all WhichKey mappings |
+| `<leader>wk` | Normal | Query a key prefix in WhichKey |
+| `;` | Normal | Enter command-line mode |
+| `jk` | Insert | Return to Normal mode |
+
+### Find files and text
+
+Telescope supplies the main search workflows:
+
+| Key | Action |
+| --- | --- |
+| `<leader>ff` | Find files in the project |
+| `<leader>fa` | Find all files, including hidden and ignored files |
+| `<leader>fw` | Search project text with ripgrep |
+| `<leader>fz` | Search inside the current buffer |
+| `<leader>fb` | Search open buffers |
+| `<leader>fo` | Search recently opened files |
+| `<leader>fh` | Search Neovim help tags |
+| `<leader>ma` | Search marks |
+
+`<leader>fw` requires `rg` to be available on `PATH`.
+
+### Browse files
+
+| Key | Action |
+| --- | --- |
+| `<C-n>` | Toggle NvimTree |
+| `<leader>e` | Focus NvimTree |
+
+NvimTree uses the standard NvChad configuration. The custom `lua/configs/nvimtree.lua` module currently exists as an inactive configuration draft and is not loaded.
+
+### Work with buffers and windows
+
+| Key | Action |
+| --- | --- |
+| `<Tab>` | Go to the next buffer |
+| `<S-Tab>` | Go to the previous buffer |
+| `<leader>b` | Create an empty buffer |
+| `<leader>x` | Close the current buffer |
+| `<C-h>` | Move to the window on the left |
+| `<C-j>` | Move to the window below |
+| `<C-k>` | Move to the window above |
+| `<C-l>` | Move to the window on the right |
+
+The buffer mappings are available while NvChad's tab/buffer line is enabled, which is the default in this configuration.
+
+### Use terminals
+
+| Key | Mode | Action |
+| --- | --- | --- |
+| `<leader>h` | Normal | Open a new horizontal terminal |
+| `<leader>v` | Normal | Open a new vertical terminal |
+| `<A-h>` | Normal/Terminal | Toggle the persistent horizontal terminal |
+| `<A-v>` | Normal/Terminal | Toggle the persistent vertical terminal |
+| `<A-i>` | Normal/Terminal | Toggle the floating terminal |
+| `<C-x>` | Terminal | Leave Terminal mode |
+
+Some desktop environments or terminal emulators intercept Alt combinations. See [Troubleshooting](#troubleshooting) if a terminal mapping does not arrive in Neovim.
+
+### General editing mappings
+
+| Key | Mode | Action |
+| --- | --- | --- |
+| `<C-s>` | Normal | Save the current file |
+| `<C-c>` | Normal | Copy the whole file to the system clipboard |
+| `<Esc>` | Normal | Clear search highlighting |
+| `<leader>/` | Normal/Visual | Toggle a comment |
+| `<leader>n` | Normal | Toggle line numbers |
+| `<leader>rn` | Normal | Toggle relative line numbers |
+
+In Insert mode, `<C-b>` and `<C-e>` move to the beginning and end of the line. `<C-h>`, `<C-j>`, `<C-k>`, and `<C-l>` move the cursor left, down, up, and right.
+
+## Editing and completion
+
+Completion is provided by nvim-cmp and draws suggestions from:
+
+- attached language servers
+- LuaSnip snippets and friendly-snippets
+- words in the current buffer
+- Neovim's Lua API
+- filesystem paths
+
+Autopairs inserts and manages matching delimiters such as `()`, `{}`, and `[]`. Completion is loaded when Insert mode is first entered.
+
+| Key | Action while completing |
+| --- | --- |
+| `<C-Space>` | Open completion manually |
+| `<C-n>` or `<Tab>` | Select the next item |
+| `<C-p>` or `<S-Tab>` | Select the previous item |
+| `<CR>` | Confirm the selected item |
+| `<C-d>` / `<C-f>` | Scroll documentation up/down |
+| `<C-e>` | Close completion |
 
-1. github/copilot.vim
-2. Copilot accept mapping on Ctrl+l in insert mode
+`<Tab>` and `<S-Tab>` also move forward and backward through snippet placeholders when the completion menu is closed.
 
-### Git
+## Formatting
 
-1. gitsigns (hunk navigation/actions)
-2. lazygit.nvim for full Git TUI entry
-3. Telescope git status and commits shortcuts
+[Conform](https://github.com/stevearc/conform.nvim) formats supported buffers automatically on save with a 500 ms timeout. If no configured formatter is available, it falls back to an attached LSP formatter when possible.
 
-### Debugging
+Use `<leader>fm` in Normal or Visual mode to format manually.
 
-1. nvim-dap
-2. nvim-dap-ui
-3. nvim-dap-python
-4. nvim-nio
-5. launch.json create/open helper command
-6. REPL-first bottom pane layout
+| File type | Formatter executable |
+| --- | --- |
+| Lua | `stylua` |
+| C and C++ | `clang-format` |
+| Rust | `rustfmt` |
+| Go | `goimports`, then `gofmt` |
+| Python | `ruff` (`ruff_format`) |
+| TOML | `taplo` |
+| Shell and Bash | `shfmt` |
 
-## Keymaps Reference
+Conform does not install these programs. Install them with Mason, your language toolchain, or the system package manager. Use `:ConformInfo` in a buffer to see the selected formatter and whether its executable is available.
 
-This section covers notable user-defined mappings from [lua/mappings.lua](lua/mappings.lua).
+## Language servers
 
-### General
+NvChad configures Neovim's native LSP client and always enables `lua_ls`. This configuration additionally enables the following servers:
 
-1. ; -> command mode (:)
-2. insert jk -> escape
-3. leader t t -> toggle light/dark GitHub theme
+| Language or file type | Neovim server name | Common executable/package |
+| --- | --- | --- |
+| Lua | `lua_ls` | `lua-language-server` |
+| HTML | `html` | `vscode-html-language-server` / `html-lsp` |
+| CSS | `cssls` | `vscode-css-language-server` / `css-lsp` |
+| C and C++ | `clangd` | `clangd` |
+| Rust | `rust_analyzer` | `rust-analyzer` |
+| Go | `gopls` | `gopls` |
+| Python | `pyright` | `pyright-langserver` / `pyright` |
+| Dockerfile | `dockerls` | `docker-langserver` / `dockerfile-language-server` |
+| Docker Compose | `docker_compose_language_service` | `docker-compose-langserver` / `docker-compose-language-service` |
+| TOML | `taplo` | `taplo` |
+| Bash | `bashls` | `bash-language-server` |
 
-### Navigation And Code Intelligence
+The configuration enables clients; it does not automatically install their executables.
 
-1. F12 -> go to definition
-2. Ctrl+t -> workspace symbol search (Telescope LSP dynamic workspace symbols)
+### Install a server
 
-### File Browsing
+1. Open `:Mason`.
+2. Find the desired package.
+3. Press `i` to install it.
+4. Reopen the relevant file or restart Neovim.
+5. Run `:LspInfo` to verify that the client attached.
 
-1. leader o -> open Oil floating browser
+Installing the executable through a system package manager is also valid as long as it is on `PATH` when Neovim starts.
 
-### Git
+### LSP mappings
 
-1. leader g g -> open Lazygit (warns if lazygit binary is not installed)
-2. leader g s -> Telescope git status
-3. leader g c -> Telescope git commits
-4. ] h / [ h -> next/previous hunk
-5. leader g a -> stage hunk
-6. leader g r -> reset hunk
-7. leader g A -> stage buffer
-8. leader g R -> reset buffer
-9. leader g h -> preview hunk
-10. leader g d -> diff this
+These mappings become available in a buffer after an LSP client attaches:
 
-### Debugging (VS Code-Like F Keys + Leader Fallback)
+| Key | Action |
+| --- | --- |
+| `gd` | Go to definition |
+| `gD` | Go to declaration |
+| `<leader>D` | Go to type definition |
+| `<leader>ra` | Rename the symbol under the cursor |
+| `<leader>wa` | Add a workspace folder |
+| `<leader>wr` | Remove a workspace folder |
+| `<leader>wl` | List workspace folders |
+| `<leader>ds` | Put diagnostics in the location list |
 
-Function keys:
+Hover, references, code actions, and diagnostic navigation also remain available through Neovim's built-in LSP commands and WhichKey-discoverable NvChad behavior.
 
-1. F5 -> debug start/continue
-2. Shift+F5 -> debug stop
-3. F9 -> toggle breakpoint
-4. F10 -> step over
-5. F11 -> step into
-6. Shift+F11 -> step out
+## Treesitter
 
-Leader debug group:
+Treesitter provides syntax-aware highlighting and parsing. The configuration ensures parsers are installed for:
 
-1. leader d c -> continue
-2. leader d i -> step into
-3. leader d o -> step over
-4. leader d O -> step out
-5. leader d b -> toggle breakpoint
-6. leader d B -> conditional breakpoint prompt
-7. leader d l -> run last
-8. leader d r -> toggle REPL
-9. leader d u -> toggle DAP UI
-10. leader d C -> open DAP console float
-11. leader d x -> terminate
-12. leader d j -> open/create launch.json
+- Vim, Lua, and Vimdoc
+- HTML and CSS
+- C and C++
+- Rust
+- Go, Go modules, and Go sums
+- Python
+- Dockerfile
+- TOML
+- Bash
 
-### Copilot
+Use `:TSUpdate` to update installed parsers. Use `:TSInstall <language>` to add another parser without changing the configuration; add it to `ensure_installed` in `lua/plugins/init.lua` if it should remain part of this setup.
 
-1. insert Ctrl+l -> accept Copilot suggestion
+## Git integration
 
-## Language Tooling Matrix
+Gitsigns displays added, changed, and deleted line indicators in Git-managed files. Telescope supplies two useful repository views:
 
-### LSP Servers
+| Key | Action |
+| --- | --- |
+| `<leader>gt` | Search changed files from Git status |
+| `<leader>cm` | Search Git commits |
 
-Configured in [lua/configs/lspconfig.lua](lua/configs/lspconfig.lua):
+There is no Lazygit integration or custom hunk-action mapping in the active configuration. Use the command line or add a dedicated plugin if a full Git interface is desired.
 
-1. html
-2. cssls
-3. clangd
-4. rust_analyzer
-5. gopls
-6. pyright
-7. marksman
-8. dockerls
-9. docker_compose_language_service
-10. taplo
-11. yamlls
-12. jsonls
-13. bashls
+## Appearance and themes
 
-### Formatters (Conform)
+The default colorscheme is `github_dark`; the paired light theme is `github_light`.
 
-Configured in [lua/configs/conform.lua](lua/configs/conform.lua):
+| Key | Action |
+| --- | --- |
+| `<leader>tt` | Toggle between GitHub dark and light themes |
+| `<leader>th` | Open NvChad's theme picker |
 
-1. lua -> stylua
-2. c/cpp -> clang_format
-3. rust -> rustfmt
-4. go -> goimports + gofmt
-5. python -> ruff_format
-6. markdown/yaml/json/jsonc -> prettier
-7. toml -> taplo
-8. sh/bash -> shfmt
+NvChad also supplies the statusline, tab/buffer line, indentation guides, icons, menus, and notification styling. A Nerd Font must be selected in the terminal for the glyphs to render correctly.
 
-format_on_save is enabled with LSP fallback.
+Important inherited editor defaults include:
 
-### Treesitter Parsers
+- absolute line numbers
+- two-space indentation with spaces
+- case-insensitive search that becomes case-sensitive when uppercase letters are used
+- mouse support
+- the system clipboard through `unnamedplus`
 
-Configured in [lua/plugins/init.lua](lua/plugins/init.lua):
+## Maintenance and customization
 
-1. vim, lua, vimdoc
-2. html, css
-3. c, cpp
-4. rust
-5. go, gomod, gosum
-6. python
-7. markdown, markdown_inline
-8. yaml
-9. json, jsonc
-10. dockerfile
-11. toml
-12. bash
+### Update plugins
 
-## File Explorer And Icons
+Open `:Lazy`, inspect available updates, and run the update action. Review the resulting `lazy-lock.json` change before committing it.
 
-### Oil
+Useful commands include:
 
-Oil is configured as a centered floating browser with rounded border and hidden-file visibility enabled.
+| Command | Purpose |
+| --- | --- |
+| `:Lazy` | Inspect, install, update, or clean plugins |
+| `:Mason` | Install and inspect external development tools |
+| `:TSUpdate` | Update Treesitter parsers |
+| `:checkhealth` | Diagnose Neovim and provider problems |
+| `:ConformInfo` | Inspect formatter selection and availability |
+| `:LspInfo` | Inspect LSP clients for the current buffer |
 
-Open with leader o.
+### Add or change behavior
 
-### NvimTree
+- Add plugins or override NvChad plugin options in `lua/plugins/init.lua`.
+- Add mappings in `lua/mappings.lua` after `require "nvchad.mappings"`.
+- Add LSP server names in `lua/configs/lspconfig.lua` and install their executables.
+- Add formatter mappings in `lua/configs/conform.lua`.
+- Add Treesitter parser names to `ensure_installed` in `lua/plugins/init.lua`.
+- Change the default and toggle themes in `lua/chadrc.lua`.
 
-NvimTree uses custom render behavior and icon glyph configuration from [lua/configs/nvimtree.lua](lua/configs/nvimtree.lua).
+Keep this README synchronized when changing a user-visible mapping, tool, or workflow.
 
-### Devicons Overrides
+### Inactive configuration modules
 
-Icon overrides are defined in [lua/configs/devicons.lua](lua/configs/devicons.lua), including common files such as:
+The repository contains `configs/dap.lua`, `configs/cmp.lua`, `configs/devicons.lua`, `configs/lsp_servers.lua`, and `configs/nvimtree.lua`. They are not currently imported by an active plugin specification, so their DAP, DAP completion, custom icon, extended server-list, and custom tree behaviors are **not available at runtime**. They are retained as configuration drafts and are intentionally not documented as working features.
 
-1. README variants
-2. Dockerfile and compose files
-3. yaml/yml
-4. json/jsonc
-5. toml
-6. named entries such as .github and data (subject to consumer plugin behavior)
+Similarly, Copilot, Oil, Lazygit, Visual Multi, and nvim-dap are not declared as active plugins.
 
-## Git Workflow
+## Troubleshooting
 
-### Fast Path
+### Icons appear as boxes
 
-1. leader g g to open Lazygit for staging, committing, branching, conflict handling.
-2. Use gitsigns mappings for hunk-focused workflows directly in code buffers.
-3. Use Telescope git shortcuts for status and commit search.
+Install a Nerd Font and select that font in the terminal emulator. Restart the terminal and Neovim afterward.
 
-### Lazygit Requirement
+### Live grep fails
 
-The Lazygit Neovim plugin is installed, but the lazygit binary must also exist on your machine for leader g g to open it.
+Confirm that ripgrep is installed and visible to Neovim:
 
-## Copilot Workflow
+```vim
+:echo executable('rg')
+```
 
-Copilot plugin is configured to avoid default Tab mapping conflicts and uses Ctrl+l accept in insert mode.
+A result of `1` means Neovim can find it.
 
-Common checks:
+### An LSP client does not attach
 
-1. :Copilot status
-2. :Copilot auth (if needed)
+1. Open the relevant source file and run `:LspInfo`.
+2. Check the server in `:Mason`, or verify its executable with `:echo executable('server-command')`.
+3. Confirm that the file type is correct with `:set filetype?`.
+4. Inspect `:messages` and `:checkhealth vim.lsp` for errors.
 
-## DAP Deep Guide
+### A file does not format
 
-This section is the canonical reference for debugging in this setup.
+Run `:ConformInfo` and verify that the expected formatter is configured and available. If it is unavailable, install the executable and restart Neovim so the updated `PATH` is inherited.
 
-### DAP Stack In This Config
+### Clipboard operations fail
 
-1. nvim-dap: debug adapter protocol core
-2. nvim-dap-ui: panes for scopes, breakpoints, stacks, watches, and tray REPL
-3. nvim-dap-python: Python adapter integration
-4. nvim-cmp + cmp-dap: completion in DAP-capable input buffers
+Run `:checkhealth provider`. On Linux, install a clipboard utility appropriate for the display server, such as `wl-clipboard` on Wayland or `xclip`/`xsel` on X11.
 
-### launch.json Model
+### Alt or function keys do not work
 
-This setup follows current nvim-dap provider behavior where .vscode/launch.json is read on demand.
+The terminal emulator or desktop environment may intercept the key. Check its keyboard shortcuts and ensure Alt is sent as Meta/Escape to terminal applications. WhichKey and command-line commands provide alternatives when a key cannot be forwarded.
 
-Custom helper command:
+### Reset plugin state
 
-1. :DapEditLaunchJSON
-
-What it does:
-
-1. Creates .vscode/launch.json if missing.
-2. Writes a default Python launch config.
-3. Opens the file for editing.
-
-### Python Interpreter Resolution
-
-In [lua/configs/dap.lua](lua/configs/dap.lua), Python path is resolved in this order:
-
-1. VIRTUAL_ENV/bin/python
-2. project .venv/bin/python
-3. project venv/bin/python
-4. python3 from PATH
-5. python from PATH
-
-This favors project-local virtual environments, then system fallback.
-
-### DAP UI Layout
-
-Configured layout:
-
-1. Left sidebar:
-1. scopes
-2. breakpoints
-3. stacks
-4. watches
-2. Bottom tray:
-1. repl only (completion-friendly)
-
-Console access:
-
-1. :DapShowConsole command
-2. leader d C mapping
-
-### Session Lifecycle
-
-DAP UI is automatically opened/closed through listeners:
-
-1. Open after session initialization
-2. Close before termination
-3. Close before exit
-4. Close before disconnect
-
-### Breakpoints
-
-#### Standard Breakpoint
-
-1. Move cursor to desired line.
-2. Press F9 (or leader d b).
-3. Red breakpoint sign should appear in gutter.
-
-#### Conditional Breakpoint
-
-1. Press leader d B.
-2. Enter condition expression in prompt.
-3. Debugger stops only when condition evaluates truthy.
-
-### Start/Step/Stop Flow
-
-1. Start/Continue: F5
-2. Step Over: F10
-3. Step Into: F11
-4. Step Out: Shift+F11
-5. Stop: Shift+F5
-
-### REPL vs Console
-
-Use cases:
-
-1. REPL: expression interaction, completion-capable context
-2. Console: adapter/integrated terminal output, not general IntelliSense context
-
-### Debug Completions
-
-Configured in [lua/configs/cmp.lua](lua/configs/cmp.lua):
-
-1. cmp is enabled in DAP prompt buffers through cmp_dap.is_dap_buffer check.
-2. DAP completion source is registered for:
-1. dap-repl
-2. dapui_watches
-3. dapui_hover
-
-Practical use:
-
-1. During active session, open REPL (leader d r).
-2. Enter insert mode.
-3. Trigger completion with Ctrl+Space.
-
-Adapter capability check:
-
-1. Run :lua= require("dap").session() and require("dap").session().capabilities.supportsCompletionsRequest
-2. If false, completion responses are unsupported by the active adapter/session.
-
-## DAP Troubleshooting
-
-### 1) No Completions In Debug REPL
-
-Checklist:
-
-1. Ensure session is active.
-2. Confirm REPL buffer is focused (not console output buffer).
-3. Trigger completion with Ctrl+Space.
-4. Run capability check command above.
-5. If capability is false, adapter limitation is the blocker.
-
-### 2) launch.json Not Used
-
-Checklist:
-
-1. Ensure file path is project/.vscode/launch.json.
-2. Use leader d j to create/open expected file.
-3. Validate JSON syntax.
-4. Restart debug session.
-
-### 3) Breakpoints Do Not Hit
-
-Checklist:
-
-1. Verify correct launch configuration in launch.json.
-2. Confirm file being executed matches edited file.
-3. Check Python interpreter/debugpy environment mismatch.
-4. Confirm code path is reached.
-
-### 4) Function Keys Do Not Trigger
-
-Some terminals intercept function keys or require Fn mode toggles.
-
-Fallback:
-
-1. Use leader d mappings.
-2. Adjust terminal keyboard passthrough settings.
-
-### 5) Debug Fails To Start For Python
-
-Checklist:
-
-1. Ensure Python interpreter exists in one of configured resolution paths.
-2. Ensure debugpy is installed in selected runtime environment.
-3. Validate launch.json configuration fields (type, request, program).
-
-## Maintenance Notes
-
-When changing mappings/plugins/config behavior:
-
-1. Update [lua/mappings.lua](lua/mappings.lua) and this README together.
-2. Update plugin inventory when editing [lua/plugins/init.lua](lua/plugins/init.lua).
-3. Update DAP section when editing [lua/configs/dap.lua](lua/configs/dap.lua) or [lua/configs/cmp.lua](lua/configs/cmp.lua).
-4. Re-run :Lazy and :checkhealth after major changes.
+Start with `:Lazy sync` and `:checkhealth`. Deleting Neovim data directories should be a last resort because it removes downloaded plugins and other local state; back them up before doing so.
 
 ## Credits
 
-1. NvChad and its ecosystem.
-2. Lazy.nvim and broader Neovim plugin community.
+- [NvChad](https://github.com/NvChad/NvChad) and its plugin ecosystem
+- [lazy.nvim](https://github.com/folke/lazy.nvim)
+- The broader Neovim plugin community
