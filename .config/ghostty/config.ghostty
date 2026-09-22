@@ -7,6 +7,10 @@
 # ------------------------------------------------------------
 # THEME / APPEARANCE
 # ------------------------------------------------------------
+#
+
+# Allow nautilus to launch a new Ghostty window
+gtk-single-instance = false
 
 # Automatically follow Plasma light/dark mode
 theme = light:GitHub,dark:GitHub Dark
