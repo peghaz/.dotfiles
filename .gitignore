@@ -3,3 +3,4 @@
 .vscode
 
 .config/uv/uv-receipt.json
+nvim.log
