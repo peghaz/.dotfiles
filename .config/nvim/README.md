@@ -6,7 +6,7 @@ The leader key is **Space**. For example, `<leader>ff` means: press Space, then 
 
 ## Start here: what installs what?
 
-The setup has five moving parts. Keeping them separate makes maintenance much easier.
+The setup has six moving parts. Keeping them separate makes maintenance much easier.
 
 | Tool | What it manages | Where this configuration lives |
 | --- | --- | --- |
@@ -15,6 +15,7 @@ The setup has five moving parts. Keeping them separate makes maintenance much ea
 | **nvim-lspconfig** | Connects Neovim to installed language servers | `lua/configs/lspconfig.lua` |
 | **Conform** | Chooses and runs formatters | `lua/configs/conform.lua` |
 | **Treesitter** | Syntax parsers used for highlighting and code awareness | The Treesitter specification in `lua/plugins/init.lua` |
+| **nvim-dap** | Runs debuggers and coordinates the visual debugging UI | `lua/configs/dap.lua` |
 
 The most important distinction is:
 
@@ -89,7 +90,7 @@ Search for a package, move the cursor onto it, and press `i` to install it. Pres
 
 ### Install through commands
 
-These commands cover every active language server and every formatter that Mason can provide for this configuration:
+These commands cover the Mason-managed language servers, formatters, and debug adapter used by this configuration:
 
 ```vim
 :MasonInstall lua-language-server stylua
@@ -98,6 +99,7 @@ These commands cover every active language server and every formatter that Mason
 :MasonInstall rust-analyzer
 :MasonInstall gopls goimports
 :MasonInstall pyright ruff
+:MasonInstall debugpy
 :MasonInstall dockerfile-language-server docker-compose-language-service
 :MasonInstall taplo
 :MasonInstall bash-language-server shfmt
@@ -109,6 +111,8 @@ Two formatters come from their language toolchains rather than Mason:
 rustup component add rustfmt
 go version  # gofmt is included with Go
 ```
+
+`debugpy` is Python's debug adapter rather than a language server or formatter. The DAP configuration uses Mason's isolated `debugpy-adapter` directly, so a system-wide Debugpy installation is neither required nor used.
 
 ### What each language uses
 
@@ -289,7 +293,56 @@ Configured formatter sequence:
 
 If formatting does not happen, run `:ConformInfo`. The most common cause is a missing executable.
 
-## 7. Git, terminals, and appearance
+## 7. Debug Python visually
+
+Python debugging is provided by nvim-dap, nvim-dap-python, and nvim-dap-ui. Debugpy is installed separately by Mason:
+
+```vim
+:MasonInstall debugpy
+```
+
+Verify that Mason's adapter is available:
+
+```vim
+:echo executable(stdpath('data') .. '/mason/bin/debugpy-adapter')
+```
+
+The result should be `1`.
+
+### Debug the current Python file
+
+1. Start Neovim from the project root and open a Python file.
+2. Put the cursor on an executable line and press `<F9>` to set a breakpoint.
+3. Press `<F5>` and select the current-file Python configuration if prompted.
+4. When execution stops, inspect variables and the call stack in the left sidebar or use the REPL below the source window.
+5. Step with `<F10>`/`<F11>`, continue with `<F5>`, and stop with `<S-F5>`.
+
+The UI opens automatically when a debugging session initializes and closes when the session exits or is terminated. It shows scopes, breakpoints, stack frames, watches, and the DAP REPL. `<leader>du` toggles the complete UI manually, while `<leader>dC` opens the debug console in a floating window.
+
+### Debugging mappings
+
+| Key | What it does |
+| --- | --- |
+| `<F5>` / `<leader>dc` | Start or continue debugging |
+| `<S-F5>` / `<leader>dx` | Terminate the session |
+| `<F9>` / `<leader>db` | Toggle a breakpoint |
+| `<leader>dB` | Set a conditional breakpoint |
+| `<F10>` / `<leader>do` | Step over |
+| `<F11>` / `<leader>di` | Step into |
+| `<S-F11>` / `<leader>dO` | Step out |
+| `<leader>dl` | Run the previous configuration again |
+| `<leader>dr` | Toggle the DAP REPL |
+| `<leader>du` | Toggle the visual DAP UI |
+| `<leader>dC` | Open the debug console |
+| `<leader>dj` | Open or create `.vscode/launch.json` |
+
+### Project configurations and virtual environments
+
+Run `:DapEditLaunchJSON` or press `<leader>dj` to open the project's `.vscode/launch.json`. If it does not exist, the command creates a standard JSON configuration that launches the current Python file in the integrated terminal. Existing project launch configurations are read when a new session starts.
+
+The Debugpy adapter and the Python running the project are intentionally separate. The adapter always comes from Mason. nvim-dap-python chooses the project interpreter from `VIRTUAL_ENV`, `CONDA_PREFIX`, or common project directories such as `.venv`, `venv`, `env`, and `.env`, falling back to the system Python when no environment is detected.
+
+## 8. Git, terminals, and appearance
 
 ### Inspect Git changes
 
@@ -325,7 +378,7 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | `<leader>tt` | Local mapping | Toggle GitHub dark/light |
 | `<leader>th` | NvChad | Open the theme picker |
 
-## 8. Quick cheatsheet
+## 9. Quick cheatsheet
 
 | Workflow | Keys or command | Provided by |
 | --- | --- | --- |
@@ -339,6 +392,7 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | Hover/actions/references | `K`, `gra`, `grr` | Neovim LSP defaults |
 | Diagnostics | `<leader>ds` | LSP / NvChad |
 | Format | `<leader>fm` | Conform / NvChad mapping |
+| Python debugging | `<F5>`, `<F9>`, `<F10>`, `<F11>`, `<leader>d…` | nvim-dap / Debugpy |
 | Git status/commits | `<leader>gt`, `<leader>cm` | Telescope |
 | Terminals | `<leader>h`, `<leader>v`, `<A-i>` | NvChad |
 | Toggle theme | `<leader>tt` | Local mapping |
@@ -348,7 +402,7 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | Formatter status | `:ConformInfo` | Conform |
 | General diagnostics | `:checkhealth` | Neovim |
 
-## 9. Maintain or extend the setup
+## 10. Maintain or extend the setup
 
 ### Add a Neovim plugin
 
@@ -386,9 +440,9 @@ Change `theme` and `theme_toggle` in `lua/chadrc.lua`.
 
 ### Inactive draft modules
 
-The files `configs/dap.lua`, `configs/cmp.lua`, `configs/devicons.lua`, `configs/lsp_servers.lua`, and `configs/nvimtree.lua` are not imported by active plugin specifications. Their custom DAP, completion, icon, server-list, and tree behavior is therefore unavailable. The working behavior documented above comes from NvChad defaults and the active specifications in `lua/plugins/init.lua`.
+The files `configs/cmp.lua`, `configs/devicons.lua`, `configs/lsp_servers.lua`, and `configs/nvimtree.lua` are not imported by active plugin specifications. Their custom completion, icon, server-list, and tree behavior is therefore unavailable. The working behavior documented above comes from NvChad defaults and the active specifications in `lua/plugins/init.lua`.
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
 ### A language server does not attach
 
@@ -401,6 +455,16 @@ The files `configs/dap.lua`, `configs/cmp.lua`, `configs/devicons.lua`, `configs
 ### A file does not format
 
 Run `:ConformInfo`. Confirm that the expected formatter is listed and available. If the file type has no formatter in the table above, formatting depends on LSP fallback support.
+
+### Python debugging does not start
+
+1. Run `:Mason` and confirm that `debugpy` is installed.
+2. Confirm that `:echo executable(stdpath('data') .. '/mason/bin/debugpy-adapter')` returns `1`.
+3. Start Neovim from the project root and open a Python file before pressing `<F5>`.
+4. Run `:DapShowLog` and inspect `:messages` for adapter errors.
+5. If the wrong Python environment is used, activate it before starting Neovim or configure its path in `.vscode/launch.json`.
+
+The configuration deliberately ignores user-local `debugpy` launchers, so repairing or removing a stale `~/.local/bin/debugpy` is not required for Neovim debugging.
 
 ### Project text search fails
 
@@ -446,6 +510,7 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 | `lua/autocmds.lua` | Local autocommands layered over NvChad autocommands |
 | `lua/configs/lspconfig.lua` | Enabled language servers |
 | `lua/configs/conform.lua` | Formatters and format-on-save behavior |
+| `lua/configs/dap.lua` | Python adapter, visual debugger layout, and DAP lifecycle behavior |
 | `lua/configs/lazy.lua` | lazy.nvim UI and performance settings |
 
 ## Credits
@@ -454,4 +519,7 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 - [lazy.nvim](https://github.com/folke/lazy.nvim)
 - [Mason](https://github.com/mason-org/mason.nvim)
 - [Conform](https://github.com/stevearc/conform.nvim)
+- [nvim-dap](https://github.com/mfussenegger/nvim-dap)
+- [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
+- [nvim-dap-python](https://github.com/mfussenegger/nvim-dap-python)
 - The broader Neovim plugin community
