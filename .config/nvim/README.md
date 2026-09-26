@@ -1,158 +1,197 @@
-# Neovim Configuration Guide
+# Neovim Configuration Tutorial
 
-This is a personal [NvChad](https://nvchad.com/) user configuration managed as part of a GNU Stow dotfiles repository. It keeps NvChad's defaults and adds language tooling, automatic formatting, a GitHub light/dark theme pair, and extra Treesitter parsers.
+This is a personal [NvChad](https://nvchad.com/) configuration managed inside a GNU Stow dotfiles repository. This guide is written as a refresher: start at the top on a new machine, or jump to the workflow you have forgotten.
 
-The `<leader>` key is **Space** throughout this guide.
+The leader key is **Space**. For example, `<leader>ff` means: press Space, then `f`, then `f`.
 
-## Contents
+## Start here: what installs what?
 
-1. [What is included](#what-is-included)
-2. [Prerequisites](#prerequisites)
-3. [Installation and first launch](#installation-and-first-launch)
-4. [How the configuration is organized](#how-the-configuration-is-organized)
-5. [Daily navigation](#daily-navigation)
-6. [Editing and completion](#editing-and-completion)
-7. [Formatting](#formatting)
-8. [Language servers](#language-servers)
-9. [Treesitter](#treesitter)
-10. [Git integration](#git-integration)
-11. [Appearance and themes](#appearance-and-themes)
-12. [Maintenance and customization](#maintenance-and-customization)
-13. [Troubleshooting](#troubleshooting)
+The setup has five moving parts. Keeping them separate makes maintenance much easier.
 
-## What is included
+| Tool | What it manages | Where this configuration lives |
+| --- | --- | --- |
+| **lazy.nvim** | Neovim plugins such as Telescope, NvimTree, and Conform | `lua/plugins/init.lua` and NvChad's plugin specifications |
+| **Mason** | External programs such as language servers and formatters | Installed locally with `:Mason` or `:MasonInstall` |
+| **nvim-lspconfig** | Connects Neovim to installed language servers | `lua/configs/lspconfig.lua` |
+| **Conform** | Chooses and runs formatters | `lua/configs/conform.lua` |
+| **Treesitter** | Syntax parsers used for highlighting and code awareness | The Treesitter specification in `lua/plugins/init.lua` |
 
-- NvChad 2.5 as the base configuration and UI
-- lazy.nvim for plugin management
-- NvimTree for browsing project files
-- Telescope for files, text, buffers, help, marks, and Git searches
-- nvim-cmp, LuaSnip, friendly-snippets, and autopairs for completion
-- Neovim LSP support with Mason available for installing external tools
-- Conform for manual and format-on-save formatting
-- Treesitter parsers for the configured development languages
-- Gitsigns for Git change indicators
-- Integrated horizontal, vertical, and floating terminals
-- GitHub dark and light themes with a one-key toggle
+The most important distinction is:
 
-## Prerequisites
+> Lazy installs Neovim plugins. Mason installs command-line development tools used by those plugins.
 
-Install the following before starting:
+## 1. Install the configuration
 
-- **Neovim 0.11 or newer**
-- **Git**, used to bootstrap lazy.nvim and download plugins
-- **GNU Stow**, used by the parent dotfiles repository
-- A **Nerd Font**, needed for file, statusline, and diagnostic icons
-- **ripgrep (`rg`)**, recommended for Telescope live grep
-- A system clipboard provider such as `xclip`, `xsel`, or `wl-clipboard` on Linux
+### Prerequisites
 
-Language servers and formatters are separate command-line programs. Install only the ones needed for the languages you use; the relevant names are listed later in this guide.
+Install these before opening Neovim:
 
-## Installation and first launch
+- Neovim 0.11 or newer
+- Git
+- GNU Stow
+- A Nerd Font selected in the terminal
+- [ripgrep](https://github.com/BurntSushi/ripgrep) for project text search
+- A clipboard provider: `wl-clipboard` on Wayland, or `xclip`/`xsel` on X11
 
-This configuration is stored under `.config/nvim` in the parent dotfiles repository and linked into the home directory with GNU Stow.
+Language runtimes such as Go and Rust are still installed separately from Neovim.
 
-### 1. Back up an existing configuration
+### Clone and stow the dotfiles
 
-If `~/.config/nvim` already exists, move it somewhere safe before applying these dotfiles:
+Back up an existing Neovim configuration first, then clone and stow the repository:
 
 ```bash
 mv ~/.config/nvim ~/.config/nvim.backup
-```
-
-Also consider backing up `~/.local/share/nvim`, `~/.local/state/nvim`, and `~/.cache/nvim` if replacing another Neovim distribution.
-
-### 2. Clone and stow the dotfiles
-
-```bash
 git clone https://github.com/peghaz/.dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 stow .
 ```
 
-Stow creates `~/.config/nvim` as links to the files in the repository.
-
-### 3. Start Neovim
+Open a project from its root:
 
 ```bash
-nvim
+cd /path/to/project
+nvim .
 ```
 
-On the first launch, `init.lua` clones lazy.nvim when necessary. lazy.nvim then installs the pinned NvChad and plugin dependencies. After installation:
+On the first launch, `init.lua` bootstraps lazy.nvim. Lazy then downloads NvChad and its plugin dependencies using the versions pinned in `lazy-lock.json`.
 
-1. Run `:Lazy` and confirm that the plugins are installed.
-2. Run `:Mason` to install language servers and related tools.
-3. Run `:checkhealth` to inspect Neovim, providers, clipboard support, and plugins.
-4. Restart Neovim after the initial installation.
+### First-launch checklist
 
-The committed `lazy-lock.json` pins plugin revisions so that installations remain reproducible.
+Run these commands inside Neovim. Type `:` first, enter the command, and press Enter.
 
-## How the configuration is organized
+```vim
+:Lazy sync
+:Mason
+:TSInstallAll
+:checkhealth
+```
 
-Startup follows this sequence:
+- `:Lazy sync` installs, updates, and cleans Neovim plugins according to the lockfile.
+- `:Mason` opens the external-tool installer.
+- `:TSInstallAll` installs every syntax parser listed by this configuration.
+- `:checkhealth` reports missing providers and environment problems.
 
-1. `init.lua` sets Space as the leader key and bootstraps lazy.nvim.
-2. lazy.nvim loads NvChad 2.5 and the user plugin specifications.
-3. NvChad generates and loads its theme and statusline highlights.
-4. `lua/options.lua` and `lua/autocmds.lua` load the NvChad defaults.
-5. `lua/mappings.lua` loads NvChad mappings and applies local additions.
+Restart Neovim after the first installation.
 
-The main customization points are:
+## 2. Install language servers and formatters
 
-| Path | Purpose |
+The configuration enables language integrations, but it does not automatically install every external executable. Install only the languages you actually use.
+
+### Install through the Mason interface
+
+Run:
+
+```vim
+:Mason
+```
+
+Search for a package, move the cursor onto it, and press `i` to install it. Press `g?` inside Mason to see all of its keys.
+
+### Install through commands
+
+These commands cover every active language server and every formatter that Mason can provide for this configuration:
+
+```vim
+:MasonInstall lua-language-server stylua
+:MasonInstall html-lsp css-lsp
+:MasonInstall clangd clang-format
+:MasonInstall rust-analyzer
+:MasonInstall gopls goimports
+:MasonInstall pyright ruff
+:MasonInstall dockerfile-language-server docker-compose-language-service
+:MasonInstall taplo
+:MasonInstall bash-language-server shfmt
+```
+
+Two formatters come from their language toolchains rather than Mason:
+
+```bash
+rustup component add rustfmt
+go version  # gofmt is included with Go
+```
+
+### What each language uses
+
+| Language | LSP configuration | Mason package | Formatter | Treesitter parser |
+| --- | --- | --- | --- | --- |
+| Lua | `lua_ls` | `lua-language-server` | `stylua` | `lua` |
+| HTML | `html` | `html-lsp` | LSP fallback when supported | `html` |
+| CSS | `cssls` | `css-lsp` | LSP fallback when supported | `css` |
+| C | `clangd` | `clangd` | `clang-format` | `c` |
+| C++ | `clangd` | `clangd` | `clang-format` | `cpp` |
+| Rust | `rust_analyzer` | `rust-analyzer` | `rustfmt` from Rustup | `rust` |
+| Go | `gopls` | `gopls` | `goimports`, then `gofmt` | `go`, `gomod`, `gosum` |
+| Python | `pyright` | `pyright` | `ruff` | `python` |
+| Dockerfile | `dockerls` | `dockerfile-language-server` | LSP fallback when supported | `dockerfile` |
+| Docker Compose | `docker_compose_language_service` | `docker-compose-language-service` | LSP fallback when supported | — |
+| TOML | `taplo` | `taplo` | `taplo` | `toml` |
+| Shell/Bash | `bashls` | `bash-language-server` | `shfmt` | `bash` |
+
+To verify the current file:
+
+```vim
+:LspInfo
+:ConformInfo
+:set filetype?
+```
+
+`LspInfo` should show an attached client. `ConformInfo` shows the selected formatter and whether its executable was found.
+
+## 3. Learn and discover the keys
+
+You do not need to memorize everything at once.
+
+1. Press Space and pause to open WhichKey for the leader-key menu.
+2. Continue pressing keys to narrow the menu.
+3. Use `<leader>ch` for NvChad's cheatsheet.
+4. Use `<leader>wK` to list mappings through WhichKey.
+5. Use `<leader>wk`, then enter a key prefix, to inspect a specific mapping group.
+
+The tables below use these mode names:
+
+- **Normal**: the default command/navigation mode.
+- **Insert**: the mode used while typing text.
+- **Visual**: the mode used while selecting text.
+- **Terminal**: input is being sent to a terminal buffer.
+
+## 4. Daily workflow tutorial
+
+### Find a file or search the project
+
+Telescope provides the main search workflows.
+
+| Key | What it does |
 | --- | --- |
-| `lua/chadrc.lua` | Theme and NvChad UI choices |
-| `lua/plugins/init.lua` | Added plugins and overrides of NvChad plugin options |
-| `lua/mappings.lua` | User-defined mappings layered over NvChad defaults |
-| `lua/configs/lspconfig.lua` | Enabled language servers |
-| `lua/configs/conform.lua` | Formatter selection and format-on-save behavior |
-| `lua/configs/lazy.lua` | lazy.nvim UI and runtime-path settings |
-
-## Daily navigation
-
-### Discover mappings
-
-Press Space and pause to open WhichKey. It displays available mapping groups and is the easiest way to discover NvChad commands.
-
-| Key | Mode | Action |
-| --- | --- | --- |
-| `<leader>ch` | Normal | Open the NvChad cheatsheet |
-| `<leader>wK` | Normal | Show all WhichKey mappings |
-| `<leader>wk` | Normal | Query a key prefix in WhichKey |
-| `;` | Normal | Enter command-line mode |
-| `jk` | Insert | Return to Normal mode |
-
-### Find files and text
-
-Telescope supplies the main search workflows:
-
-| Key | Action |
-| --- | --- |
-| `<leader>ff` | Find files in the project |
+| `<leader>ff` | Find project files |
 | `<leader>fa` | Find all files, including hidden and ignored files |
 | `<leader>fw` | Search project text with ripgrep |
-| `<leader>fz` | Search inside the current buffer |
+| `<leader>fz` | Fuzzy-search inside the current file |
 | `<leader>fb` | Search open buffers |
 | `<leader>fo` | Search recently opened files |
-| `<leader>fh` | Search Neovim help tags |
+| `<leader>fh` | Search Neovim help |
 | `<leader>ma` | Search marks |
 
-`<leader>fw` requires `rg` to be available on `PATH`.
+Example: to find every occurrence of a function name, press `<leader>fw`, type the name, and press Enter on a result.
 
-### Browse files
+### Browse the project tree
 
-| Key | Action |
+NvimTree provides the file explorer.
+
+| Key | What it does |
 | --- | --- |
-| `<C-n>` | Toggle NvimTree |
-| `<leader>e` | Focus NvimTree |
+| `<C-n>` | Toggle the project tree |
+| `<leader>e` | Focus the project tree |
 
-NvimTree uses the standard NvChad configuration. The custom `lua/configs/nvimtree.lua` module currently exists as an inactive configuration draft and is not loaded.
+Press `<C-n>` again to close it. NvimTree itself has contextual mappings; press `g?` while the tree is focused to view them.
 
-### Work with buffers and windows
+### Move between buffers and windows
 
-| Key | Action |
+Buffers are open files; windows are the visible panes displaying them.
+
+| Key | What it does |
 | --- | --- |
-| `<Tab>` | Go to the next buffer |
-| `<S-Tab>` | Go to the previous buffer |
+| `<Tab>` | Next buffer |
+| `<S-Tab>` | Previous buffer |
 | `<leader>b` | Create an empty buffer |
 | `<leader>x` | Close the current buffer |
 | `<C-h>` | Move to the window on the left |
@@ -160,47 +199,28 @@ NvimTree uses the standard NvChad configuration. The custom `lua/configs/nvimtre
 | `<C-k>` | Move to the window above |
 | `<C-l>` | Move to the window on the right |
 
-The buffer mappings are available while NvChad's tab/buffer line is enabled, which is the default in this configuration.
+The buffer mappings depend on NvChad's tab/buffer line, which is enabled in this configuration.
 
-### Use terminals
+### Edit, save, and comment
 
-| Key | Mode | Action |
+| Key | Mode | What it does |
 | --- | --- | --- |
-| `<leader>h` | Normal | Open a new horizontal terminal |
-| `<leader>v` | Normal | Open a new vertical terminal |
-| `<A-h>` | Normal/Terminal | Toggle the persistent horizontal terminal |
-| `<A-v>` | Normal/Terminal | Toggle the persistent vertical terminal |
-| `<A-i>` | Normal/Terminal | Toggle the floating terminal |
-| `<C-x>` | Terminal | Leave Terminal mode |
-
-Some desktop environments or terminal emulators intercept Alt combinations. See [Troubleshooting](#troubleshooting) if a terminal mapping does not arrive in Neovim.
-
-### General editing mappings
-
-| Key | Mode | Action |
-| --- | --- | --- |
+| `jk` | Insert | Return to Normal mode |
+| `;` | Normal | Enter command-line mode without Shift |
 | `<C-s>` | Normal | Save the current file |
 | `<C-c>` | Normal | Copy the whole file to the system clipboard |
 | `<Esc>` | Normal | Clear search highlighting |
-| `<leader>/` | Normal/Visual | Toggle a comment |
-| `<leader>n` | Normal | Toggle line numbers |
+| `<leader>/` | Normal/Visual | Comment or uncomment the line/selection |
+| `<leader>n` | Normal | Toggle absolute line numbers |
 | `<leader>rn` | Normal | Toggle relative line numbers |
 
 In Insert mode, `<C-b>` and `<C-e>` move to the beginning and end of the line. `<C-h>`, `<C-j>`, `<C-k>`, and `<C-l>` move the cursor left, down, up, and right.
 
-## Editing and completion
+### Use completion and snippets
 
-Completion is provided by nvim-cmp and draws suggestions from:
+nvim-cmp loads when Insert mode is first entered. It combines suggestions from attached language servers, snippets, the current buffer, Neovim's Lua API, and filesystem paths. LuaSnip handles snippets, and nvim-autopairs manages matching brackets and quotes.
 
-- attached language servers
-- LuaSnip snippets and friendly-snippets
-- words in the current buffer
-- Neovim's Lua API
-- filesystem paths
-
-Autopairs inserts and manages matching delimiters such as `()`, `{}`, and `[]`. Completion is loaded when Insert mode is first entered.
-
-| Key | Action while completing |
+| Key | What it does while completing |
 | --- | --- |
 | `<C-Space>` | Open completion manually |
 | `<C-n>` or `<Tab>` | Select the next item |
@@ -209,61 +229,15 @@ Autopairs inserts and manages matching delimiters such as `()`, `{}`, and `[]`. 
 | `<C-d>` / `<C-f>` | Scroll documentation up/down |
 | `<C-e>` | Close completion |
 
-`<Tab>` and `<S-Tab>` also move forward and backward through snippet placeholders when the completion menu is closed.
+When the completion menu is closed, `<Tab>` and `<S-Tab>` move forward and backward through snippet placeholders.
 
-## Formatting
+## 5. Navigate and understand code with LSP
 
-[Conform](https://github.com/stevearc/conform.nvim) formats supported buffers automatically on save with a 500 ms timeout. If no configured formatter is available, it falls back to an attached LSP formatter when possible.
+Open a source file from the project root and run `:LspInfo`. If the expected client is attached, these mappings are available.
 
-Use `<leader>fm` in Normal or Visual mode to format manually.
+### NvChad LSP mappings
 
-| File type | Formatter executable |
-| --- | --- |
-| Lua | `stylua` |
-| C and C++ | `clang-format` |
-| Rust | `rustfmt` |
-| Go | `goimports`, then `gofmt` |
-| Python | `ruff` (`ruff_format`) |
-| TOML | `taplo` |
-| Shell and Bash | `shfmt` |
-
-Conform does not install these programs. Install them with Mason, your language toolchain, or the system package manager. Use `:ConformInfo` in a buffer to see the selected formatter and whether its executable is available.
-
-## Language servers
-
-NvChad configures Neovim's native LSP client and always enables `lua_ls`. This configuration additionally enables the following servers:
-
-| Language or file type | Neovim server name | Common executable/package |
-| --- | --- | --- |
-| Lua | `lua_ls` | `lua-language-server` |
-| HTML | `html` | `vscode-html-language-server` / `html-lsp` |
-| CSS | `cssls` | `vscode-css-language-server` / `css-lsp` |
-| C and C++ | `clangd` | `clangd` |
-| Rust | `rust_analyzer` | `rust-analyzer` |
-| Go | `gopls` | `gopls` |
-| Python | `pyright` | `pyright-langserver` / `pyright` |
-| Dockerfile | `dockerls` | `docker-langserver` / `dockerfile-language-server` |
-| Docker Compose | `docker_compose_language_service` | `docker-compose-langserver` / `docker-compose-language-service` |
-| TOML | `taplo` | `taplo` |
-| Bash | `bashls` | `bash-language-server` |
-
-The configuration enables clients; it does not automatically install their executables.
-
-### Install a server
-
-1. Open `:Mason`.
-2. Find the desired package.
-3. Press `i` to install it.
-4. Reopen the relevant file or restart Neovim.
-5. Run `:LspInfo` to verify that the client attached.
-
-Installing the executable through a system package manager is also valid as long as it is on `PATH` when Neovim starts.
-
-### LSP mappings
-
-These mappings become available in a buffer after an LSP client attaches:
-
-| Key | Action |
+| Key | What it does |
 | --- | --- |
 | `gd` | Go to definition |
 | `gD` | Go to declaration |
@@ -274,129 +248,210 @@ These mappings become available in a buffer after an LSP client attaches:
 | `<leader>wl` | List workspace folders |
 | `<leader>ds` | Put diagnostics in the location list |
 
-Hover, references, code actions, and diagnostic navigation also remain available through Neovim's built-in LSP commands and WhichKey-discoverable NvChad behavior.
+### Neovim's built-in LSP mappings
 
-## Treesitter
+Neovim 0.11+ also supplies these defaults when the server supports the operation:
 
-Treesitter provides syntax-aware highlighting and parsing. The configuration ensures parsers are installed for:
-
-- Vim, Lua, and Vimdoc
-- HTML and CSS
-- C and C++
-- Rust
-- Go, Go modules, and Go sums
-- Python
-- Dockerfile
-- TOML
-- Bash
-
-Use `:TSUpdate` to update installed parsers. Use `:TSInstall <language>` to add another parser without changing the configuration; add it to `ensure_installed` in `lua/plugins/init.lua` if it should remain part of this setup.
-
-## Git integration
-
-Gitsigns displays added, changed, and deleted line indicators in Git-managed files. Telescope supplies two useful repository views:
-
-| Key | Action |
+| Key | What it does |
 | --- | --- |
-| `<leader>gt` | Search changed files from Git status |
+| `K` | Show hover documentation |
+| `gra` | Show code actions |
+| `gri` | Go to implementation |
+| `grn` | Rename a symbol |
+| `grr` | Find references |
+| `grt` | Go to type definition |
+| `gO` | List document symbols |
+| `<C-s>` | Show signature help in Insert mode |
+
+If a mapping appears to do nothing, first check `:LspInfo`. A configured server cannot attach until its executable has been installed.
+
+## 6. Format code
+
+Conform formats supported files automatically immediately before they are saved. It waits up to 500 ms for the formatter and falls back to an attached LSP formatter when no configured formatter is available.
+
+To format manually in Normal or Visual mode:
+
+| Key | What it does |
+| --- | --- |
+| `<leader>fm` | Format the current file |
+
+Configured formatter sequence:
+
+| File type | Formatter |
+| --- | --- |
+| Lua | `stylua` |
+| C/C++ | `clang-format` |
+| Rust | `rustfmt` |
+| Go | `goimports`, then `gofmt` |
+| Python | `ruff` |
+| TOML | `taplo` |
+| Shell/Bash | `shfmt` |
+
+If formatting does not happen, run `:ConformInfo`. The most common cause is a missing executable.
+
+## 7. Git, terminals, and appearance
+
+### Inspect Git changes
+
+Gitsigns displays added, changed, and deleted line indicators beside Git-managed files. Telescope provides repository-wide views:
+
+| Key | What it does |
+| --- | --- |
+| `<leader>gt` | Search files shown by Git status |
 | `<leader>cm` | Search Git commits |
 
-There is no Lazygit integration or custom hunk-action mapping in the active configuration. Use the command line or add a dedicated plugin if a full Git interface is desired.
+This setup does not include Lazygit or custom hunk-action mappings.
 
-## Appearance and themes
+### Open terminals
 
-The default colorscheme is `github_dark`; the paired light theme is `github_light`.
+| Key | Mode | What it does |
+| --- | --- | --- |
+| `<leader>h` | Normal | Open a new horizontal terminal |
+| `<leader>v` | Normal | Open a new vertical terminal |
+| `<A-h>` | Normal/Terminal | Toggle the persistent horizontal terminal |
+| `<A-v>` | Normal/Terminal | Toggle the persistent vertical terminal |
+| `<A-i>` | Normal/Terminal | Toggle the floating terminal |
+| `<C-x>` | Terminal | Leave Terminal mode |
+| `<leader>pt` | Normal | Find a hidden terminal with Telescope |
 
-| Key | Action |
-| --- | --- |
-| `<leader>tt` | Toggle between GitHub dark and light themes |
-| `<leader>th` | Open NvChad's theme picker |
+If an Alt mapping does not work, the terminal emulator or desktop environment may be intercepting it.
 
-NvChad also supplies the statusline, tab/buffer line, indentation guides, icons, menus, and notification styling. A Nerd Font must be selected in the terminal for the glyphs to render correctly.
+### Change the theme
 
-Important inherited editor defaults include:
+The default theme is `github_dark`; its paired light theme is `github_light`.
 
-- absolute line numbers
-- two-space indentation with spaces
-- case-insensitive search that becomes case-sensitive when uppercase letters are used
-- mouse support
-- the system clipboard through `unnamedplus`
+| Key | Source | What it does |
+| --- | --- | --- |
+| `<leader>tt` | Local mapping | Toggle GitHub dark/light |
+| `<leader>th` | NvChad | Open the theme picker |
 
-## Maintenance and customization
+## 8. Quick cheatsheet
 
-### Update plugins
+| Workflow | Keys or command | Provided by |
+| --- | --- | --- |
+| Discover keys | Space and pause, `<leader>ch`, `<leader>wK` | WhichKey / NvChad |
+| Find files/text | `<leader>ff`, `<leader>fw`, `<leader>fz` | Telescope |
+| File explorer | `<C-n>`, `<leader>e` | NvimTree |
+| Buffers | `<Tab>`, `<S-Tab>`, `<leader>b`, `<leader>x` | NvChad |
+| Windows | `<C-h/j/k/l>` | NvChad |
+| Comment | `<leader>/` | Neovim comment operator / NvChad mapping |
+| Definition/rename | `gd`, `<leader>ra` | LSP / NvChad |
+| Hover/actions/references | `K`, `gra`, `grr` | Neovim LSP defaults |
+| Diagnostics | `<leader>ds` | LSP / NvChad |
+| Format | `<leader>fm` | Conform / NvChad mapping |
+| Git status/commits | `<leader>gt`, `<leader>cm` | Telescope |
+| Terminals | `<leader>h`, `<leader>v`, `<A-i>` | NvChad |
+| Toggle theme | `<leader>tt` | Local mapping |
+| Plugin manager | `:Lazy` | lazy.nvim |
+| Tool installer | `:Mason` | Mason |
+| LSP status | `:LspInfo` | Neovim LSP |
+| Formatter status | `:ConformInfo` | Conform |
+| General diagnostics | `:checkhealth` | Neovim |
 
-Open `:Lazy`, inspect available updates, and run the update action. Review the resulting `lazy-lock.json` change before committing it.
+## 9. Maintain or extend the setup
 
-Useful commands include:
+### Add a Neovim plugin
 
-| Command | Purpose |
-| --- | --- |
-| `:Lazy` | Inspect, install, update, or clean plugins |
-| `:Mason` | Install and inspect external development tools |
-| `:TSUpdate` | Update Treesitter parsers |
-| `:checkhealth` | Diagnose Neovim and provider problems |
-| `:ConformInfo` | Inspect formatter selection and availability |
-| `:LspInfo` | Inspect LSP clients for the current buffer |
+Add a lazy.nvim plugin specification to `lua/plugins/init.lua`, then run:
 
-### Add or change behavior
+```vim
+:Lazy sync
+```
 
-- Add plugins or override NvChad plugin options in `lua/plugins/init.lua`.
-- Add mappings in `lua/mappings.lua` after `require "nvchad.mappings"`.
-- Add LSP server names in `lua/configs/lspconfig.lua` and install their executables.
-- Add formatter mappings in `lua/configs/conform.lua`.
-- Add Treesitter parser names to `ensure_installed` in `lua/plugins/init.lua`.
-- Change the default and toggle themes in `lua/chadrc.lua`.
+Mason is not used for this step.
 
-Keep this README synchronized when changing a user-visible mapping, tool, or workflow.
+### Add a language server
 
-### Inactive configuration modules
+1. Add its nvim-lspconfig server name to `lua/configs/lspconfig.lua`.
+2. Install the corresponding executable with `:Mason` or a system package manager.
+3. Open a matching file and verify it with `:LspInfo`.
 
-The repository contains `configs/dap.lua`, `configs/cmp.lua`, `configs/devicons.lua`, `configs/lsp_servers.lua`, and `configs/nvimtree.lua`. They are not currently imported by an active plugin specification, so their DAP, DAP completion, custom icon, extended server-list, and custom tree behaviors are **not available at runtime**. They are retained as configuration drafts and are intentionally not documented as working features.
+### Add a formatter
 
-Similarly, Copilot, Oil, Lazygit, Visual Multi, and nvim-dap are not declared as active plugins.
+1. Add its Conform formatter name under the relevant file type in `lua/configs/conform.lua`.
+2. Install the executable with Mason or the language toolchain.
+3. Verify it with `:ConformInfo`.
 
-## Troubleshooting
+### Add a Treesitter parser
 
-### Icons appear as boxes
+Add the parser name to `ensure_installed` in `lua/plugins/init.lua`, then run `:TSInstallAll`. After Treesitter has loaded for an open file, `:TSUpdate` updates installed parsers.
 
-Install a Nerd Font and select that font in the terminal emulator. Restart the terminal and Neovim afterward.
+### Add a mapping
 
-### Live grep fails
+Add it to `lua/mappings.lua` after `require "nvchad.mappings"`. Give the mapping a useful `desc` so WhichKey can display it.
 
-Confirm that ripgrep is installed and visible to Neovim:
+### Change the theme
+
+Change `theme` and `theme_toggle` in `lua/chadrc.lua`.
+
+### Inactive draft modules
+
+The files `configs/dap.lua`, `configs/cmp.lua`, `configs/devicons.lua`, `configs/lsp_servers.lua`, and `configs/nvimtree.lua` are not imported by active plugin specifications. Their custom DAP, completion, icon, server-list, and tree behavior is therefore unavailable. The working behavior documented above comes from NvChad defaults and the active specifications in `lua/plugins/init.lua`.
+
+## 10. Troubleshooting
+
+### A language server does not attach
+
+1. Run `:LspInfo` in the affected file.
+2. Check the file type with `:set filetype?`.
+3. Open `:Mason` and confirm that the server is installed.
+4. Run `:checkhealth vim.lsp` and inspect `:messages`.
+5. Reopen the file or restart Neovim after installing the executable.
+
+### A file does not format
+
+Run `:ConformInfo`. Confirm that the expected formatter is listed and available. If the file type has no formatter in the table above, formatting depends on LSP fallback support.
+
+### Project text search fails
+
+Telescope's `<leader>fw` needs ripgrep:
 
 ```vim
 :echo executable('rg')
 ```
 
-A result of `1` means Neovim can find it.
-
-### An LSP client does not attach
-
-1. Open the relevant source file and run `:LspInfo`.
-2. Check the server in `:Mason`, or verify its executable with `:echo executable('server-command')`.
-3. Confirm that the file type is correct with `:set filetype?`.
-4. Inspect `:messages` and `:checkhealth vim.lsp` for errors.
-
-### A file does not format
-
-Run `:ConformInfo` and verify that the expected formatter is configured and available. If it is unavailable, install the executable and restart Neovim so the updated `PATH` is inherited.
+The result should be `1`.
 
 ### Clipboard operations fail
 
-Run `:checkhealth provider`. On Linux, install a clipboard utility appropriate for the display server, such as `wl-clipboard` on Wayland or `xclip`/`xsel` on X11.
+Run `:checkhealth provider` and install a provider suitable for the display server, such as `wl-clipboard`, `xclip`, or `xsel`.
 
-### Alt or function keys do not work
+### Icons appear as boxes
 
-The terminal emulator or desktop environment may intercept the key. Check its keyboard shortcuts and ensure Alt is sent as Meta/Escape to terminal applications. WhichKey and command-line commands provide alternatives when a key cannot be forwarded.
+Install a Nerd Font, select it in the terminal emulator, and restart the terminal and Neovim.
 
-### Reset plugin state
+### A mapping is missing or has changed
 
-Start with `:Lazy sync` and `:checkhealth`. Deleting Neovim data directories should be a last resort because it removes downloaded plugins and other local state; back them up before doing so.
+Press Space and pause, use `<leader>ch`, or run:
+
+```vim
+:verbose nmap <keys>
+```
+
+The verbose mapping output shows where the current mapping was defined.
+
+### Plugins fail to load
+
+Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded plugin and state directories under `~/.local` should only be deleted as a last resort and after making a backup.
+
+## Configuration map
+
+| Path | Purpose |
+| --- | --- |
+| `init.lua` | Bootstraps lazy.nvim and loads the configuration |
+| `lua/chadrc.lua` | Theme and NvChad UI settings |
+| `lua/plugins/init.lua` | Active plugin additions and overrides |
+| `lua/mappings.lua` | Local mappings layered over NvChad mappings |
+| `lua/options.lua` | Local options layered over NvChad options |
+| `lua/autocmds.lua` | Local autocommands layered over NvChad autocommands |
+| `lua/configs/lspconfig.lua` | Enabled language servers |
+| `lua/configs/conform.lua` | Formatters and format-on-save behavior |
+| `lua/configs/lazy.lua` | lazy.nvim UI and performance settings |
 
 ## Credits
 
-- [NvChad](https://github.com/NvChad/NvChad) and its plugin ecosystem
+- [NvChad](https://github.com/NvChad/NvChad)
 - [lazy.nvim](https://github.com/folke/lazy.nvim)
+- [Mason](https://github.com/mason-org/mason.nvim)
+- [Conform](https://github.com/stevearc/conform.nvim)
 - The broader Neovim plugin community
