@@ -26,12 +26,60 @@ return {
     "mfussenegger/nvim-dap",
     lazy = false,
     dependencies = {
-      "nvim-neotest/nvim-nio",
-      "rcarriga/nvim-dap-ui",
       "mfussenegger/nvim-dap-python",
+      {
+        "igorlfs/nvim-dap-view",
+        version = "1.*",
+      },
     },
     config = function()
       require "configs.dap"
+    end,
+  },
+
+  {
+    "hrsh7th/nvim-cmp",
+    dependencies = {
+      "rcarriga/cmp-dap",
+    },
+    opts = function()
+      return require "configs.cmp"
+    end,
+  },
+
+  {
+    "nvim-telescope/telescope.nvim",
+    dependencies = {
+      "nvim-telescope/telescope-file-browser.nvim",
+    },
+    opts = function()
+      return require "configs.telescope"
+    end,
+    config = function(_, opts)
+      local telescope = require "telescope"
+
+      telescope.setup(opts)
+      for _, extension in ipairs(opts.extensions_list or {}) do
+        pcall(telescope.load_extension, extension)
+      end
+    end,
+  },
+
+  {
+    "nvim-tree/nvim-tree.lua",
+    opts = function()
+      return require "configs.nvimtree"
+    end,
+  },
+
+  {
+    "jake-stewart/multicursor.nvim",
+    branch = "1.0",
+    keys = function()
+      return require("configs.multicursor").keys
+    end,
+    config = function()
+      require("configs.multicursor").setup()
     end,
   },
 

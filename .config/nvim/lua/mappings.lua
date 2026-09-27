@@ -13,6 +13,23 @@ map("n", "<leader>tt", function()
   require("base46").toggle_theme()
 end, { desc = "Toggle light/dark GitHub theme" })
 
+map("n", "<C-p>", "<cmd>Telescope find_files<CR>", { desc = "Find project files" })
+
+map("n", "<leader>e", function()
+  local path = vim.fn.expand "%:p:h"
+
+  if path == "" or vim.fn.isdirectory(path) == 0 then
+    path = vim.fn.getcwd()
+  end
+
+  require("lazy").load { plugins = { "telescope.nvim" } }
+  require("telescope").extensions.file_browser.file_browser {
+    path = path,
+    cwd = path,
+    select_buffer = true,
+  }
+end, { desc = "Browse files from current file" })
+
 map("n", "<F5>", "<cmd>DapContinue<CR>", { desc = "Debug start/continue" })
 map("n", "<S-F5>", "<cmd>DapTerminate<CR>", { desc = "Debug stop" })
 map("n", "<F9>", "<cmd>DapToggleBreakpoint<CR>", { desc = "Debug toggle breakpoint" })
@@ -36,11 +53,7 @@ map("n", "<leader>dO", "<cmd>DapStepOut<CR>", { desc = "Debug step out" })
 map("n", "<leader>dl", function()
   require("dap").run_last()
 end, { desc = "Debug run last" })
-map("n", "<leader>dr", function()
-  require("dap").repl.toggle()
-end, { desc = "Debug REPL" })
-map("n", "<leader>du", function()
-  require("dapui").toggle()
-end, { desc = "Debug UI toggle" })
-map("n", "<leader>dC", "<cmd>DapShowConsole<CR>", { desc = "Debug open console" })
+map("n", "<leader>dr", "<cmd>DapViewJump repl<CR>", { desc = "Debug REPL" })
+map("n", "<leader>du", "<cmd>DapViewToggle<CR>", { desc = "Debug UI toggle" })
+map("n", "<leader>dC", "<cmd>DapViewJump console<CR>", { desc = "Debug open console" })
 map("n", "<leader>dj", "<cmd>DapEditLaunchJSON<CR>", { desc = "Debug open launch.json" })

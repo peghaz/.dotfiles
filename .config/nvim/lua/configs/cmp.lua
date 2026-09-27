@@ -10,11 +10,12 @@ options.enabled = function()
   return ok and cmp_dap.is_dap_buffer()
 end
 
-cmp.setup.filetype({ "dap-repl", "dapui_watches", "dapui_hover" }, {
-  sources = {
+cmp.setup.filetype("dap-repl", {
+  sources = cmp.config.sources({
     { name = "dap" },
+  }, {
     { name = "buffer" },
-  },
+  }),
 })
 
 return options

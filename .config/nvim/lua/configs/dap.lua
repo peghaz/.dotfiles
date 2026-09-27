@@ -1,5 +1,5 @@
 local dap = require "dap"
-local dapui = require "dapui"
+local dap_view = require "dap-view"
 local dap_python = require "dap-python"
 
 local uv = vim.uv or vim.loop
@@ -77,28 +77,30 @@ local function ensure_launchjson()
   vim.cmd("edit " .. vim.fn.fnameescape(launch_json))
 end
 
-dapui.setup {
-  expand_lines = true,
-  layouts = {
-    {
-      elements = {
-        { id = "scopes", size = 0.35 },
-        { id = "breakpoints", size = 0.2 },
-        { id = "stacks", size = 0.2 },
-        { id = "watches", size = 0.25 },
-      },
-      position = "left",
-      size = 45,
-    },
-    {
-      elements = {
-        { id = "repl", size = 1 },
-      },
-      position = "bottom",
-      size = 12,
+dap_view.setup {
+  winbar = {
+    sections = { "scopes", "watches", "threads", "breakpoints", "repl", "console" },
+    default_section = "scopes",
+    show_keymap_hints = true,
+    controls = {
+      enabled = true,
+      position = "right",
     },
   },
+  windows = {
+    size = 0.25,
+    position = "below",
+  },
+  virtual_text = {
+    enabled = true,
+    position = "inline",
+  },
+  auto_toggle = true,
+  follow_tab = true,
+  switchbuf = "useopen,usetab,newtab",
 }
+
+dap.defaults.fallback.switchbuf = "usevisible,usetab,newtab"
 
 vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticError", linehl = "", numhl = "" })
 vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
@@ -112,25 +114,3 @@ dap_python.resolve_python = resolve_python
 vim.api.nvim_create_user_command("DapEditLaunchJSON", ensure_launchjson, {
   desc = "Open or create .vscode/launch.json",
 })
-
-vim.api.nvim_create_user_command("DapShowConsole", function()
-  dapui.float_element("console", { enter = true })
-end, {
-  desc = "Open DAP console in a floating window",
-})
-
-dap.listeners.after.event_initialized["dapui_config"] = function()
-  dapui.open()
-end
-
-dap.listeners.before.event_terminated["dapui_config"] = function()
-  dapui.close()
-end
-
-dap.listeners.before.event_exited["dapui_config"] = function()
-  dapui.close()
-end
-
-dap.listeners.before.disconnect["dapui_config"] = function()
-  dapui.close()
-end

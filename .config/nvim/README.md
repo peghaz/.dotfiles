@@ -166,6 +166,7 @@ Telescope provides the main search workflows.
 
 | Key | What it does |
 | --- | --- |
+| `<C-p>` | Quickly open a project file, like VS Code's Go to File menu |
 | `<leader>ff` | Find project files |
 | `<leader>fa` | Find all files, including hidden and ignored files |
 | `<leader>fw` | Search project text with ripgrep |
@@ -177,16 +178,24 @@ Telescope provides the main search workflows.
 
 Example: to find every occurrence of a function name, press `<leader>fw`, type the name, and press Enter on a result.
 
+`<C-p>` is the quickest route to the standard project-file picker. It searches from Neovim's current working directory and respects Git-ignore rules. The existing `<leader>ff` mapping opens the same picker.
+
 ### Browse the project tree
 
-NvimTree provides the file explorer.
+There are two complementary file-browser views. Telescope is the primary, keyboard-first browser: it opens in the center with a large file preview and starts in the current file's directory. NvimTree provides the complete project hierarchy in a centered floating window.
 
 | Key | What it does |
 | --- | --- |
-| `<C-n>` | Toggle the project tree |
-| `<leader>e` | Focus the project tree |
+| `<leader>e` | Open the centered Telescope file browser |
+| `<C-n>` | Toggle the floating project tree |
 
-Press `<C-n>` again to close it. NvimTree itself has contextual mappings; press `g?` while the tree is focused to view them.
+In the Telescope browser, type to filter names and press Enter to open the selected file or directory. Backspace moves to the parent directory. `<C-b>` toggles between browsing files and fuzzy-searching directories, `<C-h>` toggles hidden entries, and `<C-f>` searches file contents beneath the directory currently being browsed. Press `?` from Normal mode to see every available action.
+
+The browser also supports filesystem operations from Normal mode: `c` creates, `r` renames, `m` moves, and `y` copies. Press `d` to move an item to the Linux trash with `trash-put`; press `D` only when you want to delete it permanently. Both actions ask for confirmation. Use `<Tab>` and `<S-Tab>` to build a multi-selection before applying an operation.
+
+NvimTree follows the current working directory and highlights the active file. Inside the tree, `d` also moves the selected item to the trash and `D` permanently deletes it. `f` starts a live filename filter, `F` clears it, `I` toggles Git-ignored entries, and `g?` shows all contextual mappings. Move focus away or press `<C-n>` again to close the floating tree.
+
+This setup requires the `trash-cli` package and its `trash-put` command. Use `trash-list` to inspect deleted items and `trash-restore` to recover one.
 
 ### Move between buffers and windows
 
@@ -206,6 +215,10 @@ Buffers are open files; windows are the visible panes displaying them.
 The buffer mappings depend on NvChad's tab/buffer line, which is enabled in this configuration.
 
 ### Edit, save, and comment
+
+Press `<C-d>` in Normal mode to select the word under the cursor, then press it repeatedly to add the next textual occurrence. You can also select any text in Visual mode and press `<C-d>` to add its next match. Once the cursors are in place, use normal editing commands or enter Insert mode to edit every occurrence together; press `<Esc>` from Normal mode to clear the extra cursors.
+
+These mappings deliberately apply only in Normal and Visual modes. While typing in Insert mode, `<C-p>` continues to select the previous completion item and `<C-d>` continues to scroll completion documentation. Normal-mode `<C-d>` no longer performs Neovim's default half-page-down motion.
 
 | Key | Mode | What it does |
 | --- | --- | --- |
@@ -295,7 +308,7 @@ If formatting does not happen, run `:ConformInfo`. The most common cause is a mi
 
 ## 7. Debug Python visually
 
-Python debugging is provided by nvim-dap, nvim-dap-python, and nvim-dap-ui. Debugpy is installed separately by Mason:
+Python debugging is provided by nvim-dap, nvim-dap-python, and nvim-dap-view. Debugpy is installed separately by Mason:
 
 ```vim
 :MasonInstall debugpy
@@ -314,10 +327,14 @@ The result should be `1`.
 1. Start Neovim from the project root and open a Python file.
 2. Put the cursor on an executable line and press `<F9>` to set a breakpoint.
 3. Press `<F5>` and select the current-file Python configuration if prompted.
-4. When execution stops, inspect variables and the call stack in the left sidebar or use the REPL below the source window.
+4. When execution stops, inspect variables, watches, and the call stack in the tabbed panel below the source window.
 5. Step with `<F10>`/`<F11>`, continue with `<F5>`, and stop with `<S-F5>`.
 
-The UI opens automatically when a debugging session initializes and closes when the session exits or is terminated. It shows scopes, breakpoints, stack frames, watches, and the DAP REPL. `<leader>du` toggles the complete UI manually, while `<leader>dC` opens the debug console in a floating window.
+The UI opens automatically when a debugging session initializes and closes when the session exits or is terminated. It uses one compact panel with tabs for scopes, watches, threads, breakpoints, the DAP REPL, and the program console. Use the highlighted letters in the tab bar to jump directly to a view, `]v`/`[v` to move between views, and `g?` inside the panel to see view-specific actions. `<leader>du` toggles the panel manually, `<leader>dr` focuses the REPL, and `<leader>dC` focuses the program console.
+
+When execution is paused, current variable values appear inline beside their definitions. Values changed by the last step use a distinct warning-style highlight, making state changes visible without opening the scopes view.
+
+The DAP REPL has Python-aware completion supplied by Debugpy. Type part of an expression and use `<C-Space>` to request suggestions, `<C-n>`/`<C-p>` or `<Tab>`/`<S-Tab>` to select one, and `<CR>` to accept it. Buffer words are offered as a fallback. Debugger completion is scoped to the REPL and does not change completion in normal source buffers.
 
 ### Debugging mappings
 
@@ -331,9 +348,9 @@ The UI opens automatically when a debugging session initializes and closes when 
 | `<F11>` / `<leader>di` | Step into |
 | `<S-F11>` / `<leader>dO` | Step out |
 | `<leader>dl` | Run the previous configuration again |
-| `<leader>dr` | Toggle the DAP REPL |
+| `<leader>dr` | Open and focus the DAP REPL tab |
 | `<leader>du` | Toggle the visual DAP UI |
-| `<leader>dC` | Open the debug console |
+| `<leader>dC` | Open and focus the program console tab |
 | `<leader>dj` | Open or create `.vscode/launch.json` |
 
 ### Project configurations and virtual environments
@@ -383,8 +400,11 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | Workflow | Keys or command | Provided by |
 | --- | --- | --- |
 | Discover keys | Space and pause, `<leader>ch`, `<leader>wK` | WhichKey / NvChad |
+| Go to file | `<C-p>` | Telescope |
 | Find files/text | `<leader>ff`, `<leader>fw`, `<leader>fz` | Telescope |
-| File explorer | `<C-n>`, `<leader>e` | NvimTree |
+| Select next occurrence | `<C-d>` | multicursor.nvim |
+| Centered file browser | `<leader>e` | Telescope file browser |
+| Floating project tree | `<C-n>` | NvimTree |
 | Buffers | `<Tab>`, `<S-Tab>`, `<leader>b`, `<leader>x` | NvChad |
 | Windows | `<C-h/j/k/l>` | NvChad |
 | Comment | `<leader>/` | Neovim comment operator / NvChad mapping |
@@ -440,7 +460,7 @@ Change `theme` and `theme_toggle` in `lua/chadrc.lua`.
 
 ### Inactive draft modules
 
-The files `configs/cmp.lua`, `configs/devicons.lua`, `configs/lsp_servers.lua`, and `configs/nvimtree.lua` are not imported by active plugin specifications. Their custom completion, icon, server-list, and tree behavior is therefore unavailable. The working behavior documented above comes from NvChad defaults and the active specifications in `lua/plugins/init.lua`.
+The files `configs/devicons.lua` and `configs/lsp_servers.lua` are not imported by active plugin specifications. Their custom icon and server-list behavior is therefore unavailable. The working behavior documented above comes from NvChad defaults and the active specifications in `lua/plugins/init.lua`. `configs/cmp.lua`, `configs/nvimtree.lua`, and `configs/telescope.lua` are active local overrides.
 
 ## 11. Troubleshooting
 
@@ -510,7 +530,11 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 | `lua/autocmds.lua` | Local autocommands layered over NvChad autocommands |
 | `lua/configs/lspconfig.lua` | Enabled language servers |
 | `lua/configs/conform.lua` | Formatters and format-on-save behavior |
+| `lua/configs/cmp.lua` | Completion defaults plus DAP REPL completion |
 | `lua/configs/dap.lua` | Python adapter, visual debugger layout, and DAP lifecycle behavior |
+| `lua/configs/multicursor.lua` | VS Code-style next-match multicursor behavior |
+| `lua/configs/nvimtree.lua` | Floating project-tree layout and rendering |
+| `lua/configs/telescope.lua` | Centered pickers and file-browser behavior |
 | `lua/configs/lazy.lua` | lazy.nvim UI and performance settings |
 
 ## Credits
@@ -520,6 +544,9 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 - [Mason](https://github.com/mason-org/mason.nvim)
 - [Conform](https://github.com/stevearc/conform.nvim)
 - [nvim-dap](https://github.com/mfussenegger/nvim-dap)
-- [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)
+- [nvim-dap-view](https://github.com/igorlfs/nvim-dap-view)
 - [nvim-dap-python](https://github.com/mfussenegger/nvim-dap-python)
+- [cmp-dap](https://github.com/rcarriga/cmp-dap)
+- [multicursor.nvim](https://github.com/jake-stewart/multicursor.nvim)
+- [telescope-file-browser.nvim](https://github.com/nvim-telescope/telescope-file-browser.nvim)
 - The broader Neovim plugin community
