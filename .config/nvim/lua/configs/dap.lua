@@ -106,6 +106,8 @@ vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticError", 
 vim.fn.sign_define("DapStopped", { text = "", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
 vim.fn.sign_define("DapBreakpointRejected", { text = "", texthl = "DiagnosticError", linehl = "", numhl = "" })
 
+require("configs.dap_cpp").setup(dap)
+
 -- Keep the adapter isolated from project environments. nvim-dap-python still
 -- resolves the Python used by the debuggee from the active/project virtualenv.
 dap_python.setup(debugpy_adapter)

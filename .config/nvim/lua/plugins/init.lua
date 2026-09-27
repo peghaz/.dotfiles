@@ -83,6 +83,23 @@ return {
     end,
   },
 
+  {
+    "Civitasv/cmake-tools.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "mfussenegger/nvim-dap",
+    },
+    cmd = function()
+      return require("configs.cmake").commands
+    end,
+    keys = function()
+      return require("configs.cmake").keys
+    end,
+    config = function()
+      require("cmake-tools").setup(require("configs.cmake").options)
+    end,
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 

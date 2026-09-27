@@ -6,7 +6,7 @@ The leader key is **Space**. For example, `<leader>ff` means: press Space, then 
 
 ## Start here: what installs what?
 
-The setup has six moving parts. Keeping them separate makes maintenance much easier.
+The setup has seven moving parts. Keeping them separate makes maintenance much easier.
 
 | Tool | What it manages | Where this configuration lives |
 | --- | --- | --- |
@@ -16,6 +16,7 @@ The setup has six moving parts. Keeping them separate makes maintenance much eas
 | **Conform** | Chooses and runs formatters | `lua/configs/conform.lua` |
 | **Treesitter** | Syntax parsers used for highlighting and code awareness | The Treesitter specification in `lua/plugins/init.lua` |
 | **nvim-dap** | Runs debuggers and coordinates the visual debugging UI | `lua/configs/dap.lua` |
+| **CMake Tools** | Creates, configures, builds, runs, tests, and debugs CMake projects | `lua/configs/cmake.lua` |
 
 The most important distinction is:
 
@@ -95,7 +96,7 @@ These commands cover the Mason-managed language servers, formatters, and debug a
 ```vim
 :MasonInstall lua-language-server stylua
 :MasonInstall html-lsp css-lsp
-:MasonInstall clangd clang-format
+:MasonInstall clangd clang-format codelldb
 :MasonInstall rust-analyzer
 :MasonInstall gopls goimports
 :MasonInstall pyright ruff
@@ -122,7 +123,7 @@ go version  # gofmt is included with Go
 | HTML | `html` | `html-lsp` | LSP fallback when supported | `html` |
 | CSS | `cssls` | `css-lsp` | LSP fallback when supported | `css` |
 | C | `clangd` | `clangd` | `clang-format` | `c` |
-| C++ | `clangd` | `clangd` | `clang-format` | `cpp` |
+| C++ | `clangd` | `clangd`, `codelldb` for debugging | `clang-format` | `cpp` |
 | Rust | `rust_analyzer` | `rust-analyzer` | `rustfmt` from Rustup | `rust` |
 | Go | `gopls` | `gopls` | `goimports`, then `gofmt` | `go`, `gomod`, `gosum` |
 | Python | `pyright` | `pyright` | `ruff` | `python` |
@@ -306,7 +307,57 @@ Configured formatter sequence:
 
 If formatting does not happen, run `:ConformInfo`. The most common cause is a missing executable.
 
-## 7. Debug Python visually
+## 7. Build and debug CMake C++ projects
+
+CMake projects use cmake-tools.nvim for project creation, configuration, building, running, testing, and target-aware debugging. Builds use `build/<configuration>`, and generation creates a `compile_commands.json` link at the project root so clangd sees the exact compiler flags and include paths.
+
+### Start a project
+
+Open Neovim in an empty project directory and press `<leader>Ci`, or run:
+
+```vim
+:CMakeQuickStart
+```
+
+Choose C or C++, an executable or library, and a project name. The plugin creates a minimal project that is ready to configure. For just one file, create or open `CMakeLists.txt`, type `cmi`, select the friendly-snippets completion, and expand it with `<Tab>`.
+
+For established projects, open Neovim at the directory containing `CMakeLists.txt`. `CMakePresets.json` and `CMakeUserPresets.json` are used when present; otherwise CMake Tools offers its normal kit and build-type selection.
+
+### Configure, build, and run
+
+| Key | Command | What it does |
+| --- | --- | --- |
+| `<leader>Ci` | `:CMakeQuickStart` | Create a minimal C/C++ project |
+| `<leader>Cg` | `:CMakeGenerate` | Configure the project and generate the build system |
+| `<leader>Cb` | `:CMakeBuild` | Select and build a target |
+| `<leader>Cr` | `:CMakeRun` | Build and run an executable target |
+| `<leader>Cd` | `:CMakeDebug` | Build and debug an executable target |
+| `<leader>Ct` | `:CMakeRunTest` | Run CTest tests |
+| `<leader>Cs` | `:CMakeSettings` | Select presets, build type, targets, and other settings |
+
+Build output appears in Quickfix; use `:copen`, `:cnext`, and `:cprev` to inspect and navigate compiler errors. Program output runs in a horizontal terminal. Successful build windows close automatically.
+
+### Debug a target
+
+CodeLLDB is installed separately through Mason and registered with nvim-dap. A typical session is:
+
+1. Generate with `<leader>Cg` and select a `Debug` build when prompted.
+2. Set breakpoints with `<F9>`.
+3. Press `<leader>Cd` and choose an executable target.
+4. Continue and step with the same `<F5>`, `<F10>`, `<F11>`, and `<S-F11>` mappings used by Python debugging.
+5. Stop with `<S-F5>`.
+
+The existing DAP panel opens automatically and shows scopes, watches, threads, breakpoints, the REPL, and program output. Use `:CMakeLaunchArgs` before running or debugging when the target needs command-line arguments.
+
+Verify the native debug adapter with:
+
+```vim
+:echo executable(stdpath('data') .. '/mason/bin/codelldb')
+```
+
+The result should be `1`.
+
+## 8. Debug Python visually
 
 Python debugging is provided by nvim-dap, nvim-dap-python, and nvim-dap-view. Debugpy is installed separately by Mason:
 
@@ -359,7 +410,7 @@ Run `:DapEditLaunchJSON` or press `<leader>dj` to open the project's `.vscode/la
 
 The Debugpy adapter and the Python running the project are intentionally separate. The adapter always comes from Mason. nvim-dap-python chooses the project interpreter from `VIRTUAL_ENV`, `CONDA_PREFIX`, or common project directories such as `.venv`, `venv`, `env`, and `.env`, falling back to the system Python when no environment is detected.
 
-## 8. Git, terminals, and appearance
+## 9. Git, terminals, and appearance
 
 ### Inspect Git changes
 
@@ -395,7 +446,7 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | `<leader>tt` | Local mapping | Toggle GitHub dark/light |
 | `<leader>th` | NvChad | Open the theme picker |
 
-## 9. Quick cheatsheet
+## 10. Quick cheatsheet
 
 | Workflow | Keys or command | Provided by |
 | --- | --- | --- |
@@ -412,6 +463,7 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | Hover/actions/references | `K`, `gra`, `grr` | Neovim LSP defaults |
 | Diagnostics | `<leader>ds` | LSP / NvChad |
 | Format | `<leader>fm` | Conform / NvChad mapping |
+| CMake C++ workflow | `<leader>Ci`, `<leader>Cg`, `<leader>Cb`, `<leader>Cr`, `<leader>Cd` | cmake-tools.nvim / CodeLLDB |
 | Python debugging | `<F5>`, `<F9>`, `<F10>`, `<F11>`, `<leader>d…` | nvim-dap / Debugpy |
 | Git status/commits | `<leader>gt`, `<leader>cm` | Telescope |
 | Terminals | `<leader>h`, `<leader>v`, `<A-i>` | NvChad |
@@ -422,7 +474,7 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | Formatter status | `:ConformInfo` | Conform |
 | General diagnostics | `:checkhealth` | Neovim |
 
-## 10. Maintain or extend the setup
+## 11. Maintain or extend the setup
 
 ### Add a Neovim plugin
 
@@ -460,9 +512,9 @@ Change `theme` and `theme_toggle` in `lua/chadrc.lua`.
 
 ### Inactive draft modules
 
-The files `configs/devicons.lua` and `configs/lsp_servers.lua` are not imported by active plugin specifications. Their custom icon and server-list behavior is therefore unavailable. The working behavior documented above comes from NvChad defaults and the active specifications in `lua/plugins/init.lua`. `configs/cmp.lua`, `configs/nvimtree.lua`, and `configs/telescope.lua` are active local overrides.
+The files `configs/devicons.lua` and `configs/lsp_servers.lua` are not imported by active plugin specifications. Their custom icon and server-list behavior is therefore unavailable. The working behavior documented above comes from NvChad defaults and the active specifications in `lua/plugins/init.lua`. The other modules listed in the configuration map below are active local overrides.
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 ### A language server does not attach
 
@@ -485,6 +537,15 @@ Run `:ConformInfo`. Confirm that the expected formatter is listed and available.
 5. If the wrong Python environment is used, activate it before starting Neovim or configure its path in `.vscode/launch.json`.
 
 The configuration deliberately ignores user-local `debugpy` launchers, so repairing or removing a stale `~/.local/bin/debugpy` is not required for Neovim debugging.
+
+### A CMake project does not build or debug
+
+1. Start Neovim from the directory containing the top-level `CMakeLists.txt`.
+2. Confirm that `cmake`, a compiler, and the selected generator such as `ninja` are executable.
+3. Run `:CMakeGenerate!` to clean and regenerate stale build metadata.
+4. Open `:CMakeSettings` and verify the preset, build type, build target, and launch target.
+5. For debugging, use a `Debug` or `RelWithDebInfo` build and confirm that Mason's `codelldb` is executable.
+6. Inspect the `cmake-tools` buffer, Quickfix, `:DapShowLog`, and `:messages` for the underlying error.
 
 ### Project text search fails
 
@@ -531,7 +592,9 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 | `lua/configs/lspconfig.lua` | Enabled language servers |
 | `lua/configs/conform.lua` | Formatters and format-on-save behavior |
 | `lua/configs/cmp.lua` | Completion defaults plus DAP REPL completion |
-| `lua/configs/dap.lua` | Python adapter, visual debugger layout, and DAP lifecycle behavior |
+| `lua/configs/cmake.lua` | CMake Tools commands, mappings, build layout, and output behavior |
+| `lua/configs/dap.lua` | Shared visual debugger layout and DAP lifecycle behavior |
+| `lua/configs/dap_cpp.lua` | Mason CodeLLDB adapter for C and C++ |
 | `lua/configs/multicursor.lua` | VS Code-style next-match multicursor behavior |
 | `lua/configs/nvimtree.lua` | Floating project-tree layout and rendering |
 | `lua/configs/telescope.lua` | Centered pickers and file-browser behavior |
@@ -543,6 +606,7 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 - [lazy.nvim](https://github.com/folke/lazy.nvim)
 - [Mason](https://github.com/mason-org/mason.nvim)
 - [Conform](https://github.com/stevearc/conform.nvim)
+- [cmake-tools.nvim](https://github.com/Civitasv/cmake-tools.nvim)
 - [nvim-dap](https://github.com/mfussenegger/nvim-dap)
 - [nvim-dap-view](https://github.com/igorlfs/nvim-dap-view)
 - [nvim-dap-python](https://github.com/mfussenegger/nvim-dap-python)
