@@ -6,7 +6,7 @@ The leader key is **Space**. For example, `<leader>ff` means: press Space, then 
 
 ## Start here: what installs what?
 
-The setup has nine moving parts. Keeping them separate makes maintenance much easier.
+The setup has ten moving parts. Keeping them separate makes maintenance much easier.
 
 | Tool | What it manages | Where this configuration lives |
 | --- | --- | --- |
@@ -19,6 +19,7 @@ The setup has nine moving parts. Keeping them separate makes maintenance much ea
 | **CMake Tools** | Creates, configures, builds, runs, tests, and debugs CMake projects | `lua/configs/cmake.lua` |
 | **Markdown tools** | Provides Markdown editing operators and synchronized browser preview | `lua/configs/markdown.lua` |
 | **VimTeX** | Compiles LaTeX continuously and coordinates the PDF viewer | `lua/configs/latex.lua` |
+| **Iron** | Runs an interactive Python/IPython REPL beside the source buffer | `lua/configs/repl.lua` |
 
 The most important distinction is:
 
@@ -164,6 +165,8 @@ You do not need to memorize everything at once.
 4. Use `<leader>wK` to list mappings through WhichKey.
 5. Use `<leader>wk`, then enter a key prefix, to inspect a specific mapping group.
 
+The main named menus are `<leader>C` for CMake, `<leader>d` for debugging, `<leader>g` for Git, and `<leader>R` for the Python REPL. Markdown buffers additionally expose `<leader>m`, while TeX buffers expose `<leader>l`.
+
 The tables below use these mode names:
 
 - **Normal**: the default command/navigation mode.
@@ -264,7 +267,7 @@ For C and C++, clangd suggestions open automatically after the first typed chara
 | `<C-d>` / `<C-f>` | Scroll documentation up/down |
 | `<C-e>` | Close completion |
 
-When the completion menu is closed, `<Tab>` and `<S-Tab>` move forward and backward through snippet placeholders.
+When the completion menu is closed, `<Tab>` and `<S-Tab>` move forward and backward through snippet placeholders. Copilot never consumes Tab in this configuration.
 
 For project-aware C/C++ results, configure the CMake project once so that `compile_commands.json` exists. The CMake workflow below creates the root symlink automatically. Use `:LspInfo` in a `.c` or `.cpp` file to confirm that `clangd` is attached; use `:MasonInstall clangd` if it is missing.
 
@@ -274,7 +277,7 @@ Copilot provides faint inline suggestions separately from the nvim-cmp popup. Au
 
 | Key or command | What it does |
 | --- | --- |
-| `<Tab>` | Accept the visible inline suggestion; otherwise continue through completion or snippet items |
+| `<C-l>` | Accept the visible inline suggestion; move one character right when none is visible |
 | `<M-Right>` | Accept the next word |
 | `<M-C-Right>` | Accept the next line |
 | `<M-]>` / `<M-[>` | Show the next/previous suggestion |
@@ -451,7 +454,39 @@ Verify the native debug adapter with:
 
 The result should be `1`.
 
-## 9. Debug Python visually
+## 9. Run and debug Python
+
+### Work interactively in the Python REPL
+
+[iron.nvim](https://github.com/Vigemus/iron.nvim) provides a notebook-like workflow for ordinary `.py` files. It opens IPython in a 40%-wide split on the right and sends code from the source buffer without moving the source into a notebook format.
+
+The REPL uses IPython from the active `VIRTUAL_ENV` or `CONDA_PREFIX` when available. Otherwise it runs `uv run --with ipython ipython --no-autoindent`, which may download and cache IPython on its first use. If neither environment IPython nor `uv` is available, it falls back to `python3`.
+
+Divide a script into cells with `# %%` lines:
+
+```python
+# %%
+import pandas as pd
+
+# %%
+frame = pd.DataFrame({"value": [1, 2, 3]})
+frame.describe()
+```
+
+| Key | Mode | What it does |
+| --- | --- | --- |
+| `<leader>Rt` | Normal | Open or close the right-side REPL |
+| `<leader>Rf` / `<leader>Rh` | Normal | Focus / hide the REPL |
+| `<leader>Rr` | Normal | Restart the REPL |
+| `<leader>Rl` | Normal | Send the current line |
+| `<S-Enter>` / `<leader>Rv` | Visual | Send the selected code |
+| `<leader>Rc` / `<leader>Rn` | Normal | Send the current `# %%` cell / send it and move to the next cell |
+| `<leader>RF` | Normal | Send the whole file |
+| `<leader>Ri` / `<leader>Rq` | Normal | Interrupt execution / exit the REPL |
+
+Use `<C-h>` and `<C-l>` in Normal mode to move between the source and REPL panes. This is intentionally a lightweight cell-based workflow; `.ipynb` notebook editing and rich inline notebook output are not configured.
+
+### Debug Python visually
 
 Python debugging is provided by nvim-dap, nvim-dap-python, and nvim-dap-view. Debugpy is installed separately by Mason:
 
@@ -515,6 +550,9 @@ Gitsigns displays added, changed, and deleted line indicators beside Git-managed
 | Key | What it does |
 | --- | --- |
 | `<leader>gg` | Open the Neogit status screen |
+| `<leader>ga` | Stage the current file |
+| `<leader>gU` | Unstage the current file without discarding its edits |
+| `<leader>gc` | Open the Neogit commit workflow |
 | `<leader>gd` | Open the repository diff in Diffview |
 | `<leader>gD` | Close the active Diffview |
 | `<leader>gh` | Show history for the current file |
@@ -522,7 +560,7 @@ Gitsigns displays added, changed, and deleted line indicators beside Git-managed
 | `<leader>gt` | Search files shown by Git status |
 | `<leader>cm` | Search Git commits |
 
-Inside Neogit, use `s` to stage the item under the cursor, `u` to unstage it, `x` to discard it after confirmation, and `<Tab>` to expand or collapse sections. Press `c` to open commit actions, `P` for push actions, `p` for pull actions, and `?` for contextual help. Press `q` to close Neogit.
+Inside Neogit, use `s` to stage the item under the cursor, `S` to stage all unstaged items, `u` to unstage the item, `U` to unstage all items, `x` to discard after confirmation, and `<Tab>` to expand or collapse sections. Press `c` to open commit actions and then `c` again to create a commit. In the commit editor, write the message and press `<C-c><C-c>` to submit or `<C-c><C-k>` to abort. Press `P` for push actions, `p` for pull actions, `?` for contextual help, and `q` to close Neogit.
 
 Inside Diffview, `<Tab>` and `<S-Tab>` move between changed files, `[c` and `]c` move between diff hunks, and `g?` opens contextual help. Diffview uses a temporary native tab-page workspace; close it with `<leader>gD` or `:DiffviewClose` rather than the normal file-buffer shortcut.
 
@@ -570,6 +608,8 @@ Use the uppercase variants—`<leader>cO`, `<leader>cT`, `<leader>cB`, `<leader>
 
 If an Alt mapping does not work, the terminal emulator or desktop environment may be intercepting it.
 
+Ghostty is configured with 4-pixel horizontal and vertical window padding and balanced padding. This setting belongs to Ghostty, so it affects every terminal application rather than only Neovim. Open a new Ghostty window after changing it; validate the file with `ghostty +validate-config` if Ghostty reports a configuration error.
+
 ### Change the theme
 
 The default theme is `github_dark`; its paired light theme is `github_light`.
@@ -595,8 +635,9 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | Save / format | `<C-s>`, `<leader>fm` |
 | Markdown edit / preview | `gs…`, `<leader>mp`, `<leader>mo` |
 | LaTeX build / view | `<leader>lb`, `<leader>lv` |
+| Python REPL / cells | `<leader>Rt`, `<leader>Rl`, `<leader>Rc` |
 | Definition / references / rename | `gd`, `grr`, `<leader>ra` |
-| Git status / diff | `<leader>gg`, `<leader>gd` |
+| Git status / stage / commit / diff | `<leader>gg`, `<leader>ga`, `<leader>gc`, `<leader>gd` |
 | Build / debug CMake | `<leader>Cb`, `<leader>Cd` |
 | Debug | `<F5>`, `<F9>`, `<F10>`, `<F11>`, `<S-F5>` |
 | Terminal | `<leader>h`, `<leader>v`, `<A-i>` |
@@ -675,10 +716,11 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | --- | --- | --- |
 | `<C-Space>` | Insert/completion | Open completion manually |
 | `<C-n>` / `<C-p>` | Insert/completion | Select the next/previous item |
-| `<Tab>` / `<S-Tab>` | Insert/completion | Accept Copilot, move through completion, or jump through snippets |
+| `<Tab>` / `<S-Tab>` | Insert/completion | Move through completion items or jump through snippets |
 | `<CR>` | Insert/completion | Confirm the selected completion item |
 | `<C-d>` / `<C-f>` | Insert/completion | Scroll completion documentation up/down |
 | `<C-e>` | Insert/completion | Close completion |
+| `<C-l>` | Insert/Copilot | Accept the suggestion, or move right when no suggestion is visible |
 | `<M-Right>` / `<M-C-Right>` | Insert/Copilot | Accept the next word/line |
 | `<M-]>` / `<M-[>` | Insert/Copilot | Show the next/previous suggestion |
 | `<M-\>` / `<C-]>` | Insert/Copilot | Request/dismiss a suggestion |
@@ -736,11 +778,26 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | `<leader>du` / `<leader>dr` / `<leader>dC` | Normal | Toggle DAP UI / focus REPL / focus console |
 | `<leader>dj` | Normal | Open or create `.vscode/launch.json` |
 
+### Python REPL
+
+| Key | Mode/context | What it does |
+| --- | --- | --- |
+| `<leader>Rt` | Python | Toggle the right-side REPL |
+| `<leader>Rf` / `<leader>Rh` | Python | Focus / hide the REPL |
+| `<leader>Rr` | Python | Restart the REPL |
+| `<leader>Rl` | Python, Normal | Send the current line |
+| `<S-Enter>` / `<leader>Rv` | Python, Visual | Send the selection |
+| `<leader>Rc` / `<leader>Rn` | Python | Send the current cell / send it and move next |
+| `<leader>RF` | Python | Send the whole file |
+| `<leader>Ri` / `<leader>Rq` | Python | Interrupt / exit the REPL |
+
 ### Git and conflicts
 
 | Key | Mode/context | What it does |
 | --- | --- | --- |
 | `<leader>gg` | Normal | Open Neogit status |
+| `<leader>ga` / `<leader>gU` | Git buffer | Stage / unstage the current file |
+| `<leader>gc` | Normal | Open the Neogit commit workflow |
 | `<leader>gd` / `<leader>gD` | Normal | Open / close Diffview |
 | `<leader>gh` / `<leader>gH` | Normal | Show file / repository history |
 | `]c` / `[c` | Git buffer or Diffview | Go to the next/previous changed hunk |
@@ -789,7 +846,7 @@ This comparison covers stock VS Code workflows. It cannot account for every exte
 | Launch configurations | Partial | DAP can read and create a basic `.vscode/launch.json`, but it does not reproduce the full VS Code debugger-extension ecosystem. |
 | Project-wide replace UI | Missing | Search exists, but there is no dedicated preview-and-review replace interface. |
 | Fuzzy command palette shortcut | Missing | Commands can be run with `:`, but a VS Code-like fuzzy command palette is not mapped. |
-| Notebooks, remote development, and collaboration | Missing | Jupyter notebooks, Remote SSH/Containers, Live Share, and a graphical settings editor are outside the current setup. |
+| Notebooks, remote development, and collaboration | Partial | Python files support IPython and `# %%` cells, but native `.ipynb` editing, Remote SSH/Containers, Live Share, and a graphical settings editor remain outside the setup. |
 
 ### Suggested additions, in priority order
 
@@ -933,6 +990,9 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 | `lua/configs/lspconfig.lua` | Enabled language servers |
 | `lua/configs/conform.lua` | Formatters and format-on-save behavior |
 | `lua/configs/cmp.lua` | Completion defaults, C/C++ priorities, and DAP REPL completion |
+| `lua/configs/copilot.lua` | Copilot acceptance mapping without taking over Tab |
+| `lua/configs/repl.lua` | Python/IPython REPL selection, layout, cells, and mappings |
+| `lua/configs/whichkey.lua` | Named workflow groups in the leader-key menu |
 | `lua/configs/cmake.lua` | CMake Tools commands, mappings, build layout, and output behavior |
 | `lua/configs/markdown.lua` | Markdown editing, browser-preview settings, and buffer mappings |
 | `lua/configs/latex.lua` | TexLab settings, VimTeX integration, and LaTeX buffer mappings |

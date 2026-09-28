@@ -20,9 +20,9 @@ window-theme = system
 background-opacity = 0.98
 background-blur = true
 
-# Comfortable breathing room
-window-padding-x = 12
-window-padding-y = 10
+# Compact padding to give terminal applications more usable space
+window-padding-x = 4
+window-padding-y = 4
 window-padding-balance = true
 
 # Make lines slightly less cramped

@@ -108,6 +108,20 @@ return {
   },
 
   {
+    "folke/which-key.nvim",
+    opts = require("configs.whichkey").options,
+  },
+
+  {
+    "Vigemus/iron.nvim",
+    ft = "python",
+    cmd = { "IronRepl", "IronRestart", "IronFocus", "IronHide", "IronSend" },
+    config = function()
+      require("configs.repl").setup()
+    end,
+  },
+
+  {
     "jake-stewart/multicursor.nvim",
     branch = "1.0",
     keys = function()
@@ -193,5 +207,8 @@ return {
   {
     "github/copilot.vim",
     lazy = false,
+    init = function()
+      vim.g.copilot_no_tab_map = true
+    end,
   },
 }

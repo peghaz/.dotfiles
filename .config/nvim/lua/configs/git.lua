@@ -20,6 +20,7 @@ M.diffview = {
 
 M.neogit_keys = {
   { "<leader>gg", "<cmd>Neogit<CR>", desc = "Git status" },
+  { "<leader>gc", "<cmd>Neogit commit<CR>", desc = "Git commit" },
 }
 
 M.diffview_keys = {
@@ -65,6 +66,8 @@ function M.gitsigns(options)
     map("n", "]c", navigate("next", "]c"), "next hunk", { expr = true })
     map("n", "[c", navigate("prev", "[c"), "previous hunk", { expr = true })
     map("n", "<leader>gp", gitsigns.preview_hunk, "preview hunk")
+    map("n", "<leader>ga", gitsigns.stage_buffer, "stage current file")
+    map("n", "<leader>gU", gitsigns.reset_buffer_index, "unstage current file")
     map("n", "<leader>gs", gitsigns.stage_hunk, "stage hunk")
     map("x", "<leader>gs", function()
       gitsigns.stage_hunk { vim.fn.line ".", vim.fn.line "v" }

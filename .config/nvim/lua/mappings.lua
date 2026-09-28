@@ -1,4 +1,5 @@
 require "nvchad.mappings"
+require("configs.copilot").setup()
 
 -- add yours here
 
