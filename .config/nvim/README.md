@@ -111,6 +111,7 @@ These commands cover the Mason-managed language servers, formatters, and debug a
 :MasonInstall gopls goimports
 :MasonInstall pyright ruff
 :MasonInstall debugpy
+:MasonInstall biome
 :MasonInstall marksman texlab
 :MasonInstall dockerfile-language-server docker-compose-language-service
 :MasonInstall taplo
@@ -138,6 +139,7 @@ go version  # gofmt is included with Go
 | Rust | `rust_analyzer` | `rust-analyzer` | `rustfmt` from Rustup | `rust` |
 | Go | `gopls` | `gopls` | `goimports`, then `gofmt` | `go`, `gomod`, `gosum` |
 | Python | `pyright` | `pyright` | `ruff` | `python` |
+| JSON/JSONC | — | `biome`; system `jq` fallback for strict JSON | `biome`, then `jq` when Biome is unavailable | — |
 | Markdown | `marksman` | `marksman` | LSP fallback when supported | `markdown`, `markdown_inline` |
 | LaTeX | `texlab` | `texlab` | `latexindent` from TeX Live | VimTeX syntax |
 | Dockerfile | `dockerls` | `dockerfile-language-server` | LSP fallback when supported | `dockerfile` |
@@ -207,9 +209,21 @@ There are two complementary file-browser views. Telescope is the primary, keyboa
 
 In the Telescope browser, type to filter names and press Enter to open the selected file or directory. Backspace moves to the parent directory. `<C-b>` toggles between browsing files and fuzzy-searching directories, `<C-h>` toggles hidden entries, and `<C-f>` searches file contents beneath the directory currently being browsed. Press `?` from Normal mode to see every available action.
 
-The browser also supports filesystem operations from Normal mode: `c` creates, `r` renames, `m` moves, and `y` copies. Press `d` to move an item to the Linux trash with `trash-put`; press `D` only when you want to delete it permanently. Both actions ask for confirmation. Use `<Tab>` and `<S-Tab>` to build a multi-selection before applying an operation.
+The browser also supports filesystem operations from Normal mode: `c` creates, `r` renames, `m` moves, and `y` copies. Press `d` to move an item to the Linux trash with `trash-put`; press `D` only when you want to delete it permanently. Both actions ask for confirmation. Use `<Tab>` and `<S-Tab>` to build a multi-selection before applying an operation. The `<leader>o` combinations below copy paths and compare the selected entry without opening another menu.
 
 NvimTree follows the current working directory and highlights the active file. Inside the tree, `d` also moves the selected item to the trash and `D` permanently deletes it. `f` starts a live filename filter, `F` clears it, `I` toggles Git-ignored entries, and `g?` shows all contextual mappings. Move focus away or press `<C-n>` again to close the floating tree.
+
+Both explorers provide the same direct path and comparison shortcuts:
+
+| Key | What it does |
+| --- | --- |
+| `<leader>oa` | Copy the complete filesystem path |
+| `<leader>or` | Copy a path relative to the Git repository or working directory |
+| `<leader>os` | Remember the selected file for this Neovim session |
+| `<leader>oc` | Compare the remembered file with the current file in a native diff tab |
+| `<leader>oh` | Compare the tracked file's working-tree version with Git HEAD |
+
+You can select a file in one explorer and finish the comparison from the other. Comparisons accept files rather than directories. Close a two-file native comparison with `:tabclose`; close a Git comparison with `<leader>gD`.
 
 This setup requires the `trash-cli` package and its `trash-put` command. Use `trash-list` to inspect deleted items and `trash-restore` to recover one.
 
@@ -340,6 +354,8 @@ Configured formatter sequence:
 | Rust | `rustfmt` |
 | Go | `goimports`, then `gofmt` |
 | Python | `ruff` |
+| JSON | `biome`, with `jq` as the first-available fallback |
+| JSONC | `biome` |
 | LaTeX | `latexindent` |
 | TOML | `taplo` |
 | Shell/Bash | `shfmt` |
@@ -537,6 +553,8 @@ The DAP REPL has Python-aware completion supplied by Debugpy. Type part of an ex
 
 Run `:DapEditLaunchJSON` or press `<leader>dj` to open the project's `.vscode/launch.json`. If it does not exist, the command creates a standard JSON configuration that launches the current Python file in the integrated terminal. Existing project launch configurations are read when a new session starts.
 
+nvim-dap reads `launch.json` as strict JSON: comments and trailing commas are not supported by the current setup. Biome can format the file, but formatting does not make JSONC syntax valid for nvim-dap.
+
 The Debugpy adapter and the Python running the project are intentionally separate. The adapter always comes from Mason. nvim-dap-python chooses the project interpreter from `VIRTUAL_ENV`, `CONDA_PREFIX`, or common project directories such as `.venv`, `venv`, `env`, and `.env`, falling back to the system Python when no environment is detected.
 
 ## 10. Git, terminals, and appearance
@@ -679,6 +697,9 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | `f` / `F` | NvimTree | Start / clear the live filename filter |
 | `I` | NvimTree | Toggle Git-ignored files |
 | `g?` | Explorer | Show contextual mappings |
+| `<leader>oa` / `<leader>or` | Explorer | Copy the absolute / workspace-relative path |
+| `<leader>os` / `<leader>oc` | Explorer | Select a file / compare with the selected file |
+| `<leader>oh` | Explorer | Compare the selected file with Git HEAD |
 
 ### Buffers and windows
 
@@ -991,6 +1012,7 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 | `lua/configs/conform.lua` | Formatters and format-on-save behavior |
 | `lua/configs/cmp.lua` | Completion defaults, C/C++ priorities, and DAP REPL completion |
 | `lua/configs/copilot.lua` | Copilot acceptance mapping without taking over Tab |
+| `lua/configs/explorer_actions.lua` | Shared explorer clipboard and file-comparison behavior |
 | `lua/configs/repl.lua` | Python/IPython REPL selection, layout, cells, and mappings |
 | `lua/configs/whichkey.lua` | Named workflow groups in the leader-key menu |
 | `lua/configs/cmake.lua` | CMake Tools commands, mappings, build layout, and output behavior |

@@ -6,6 +6,8 @@ local options = {
     rust = { "rustfmt" },
     go = { "goimports", "gofmt" },
     python = { "ruff_format" },
+    json = { "biome", "jq", stop_after_first = true },
+    jsonc = { "biome" },
     tex = { "latexindent" },
     toml = { "taplo" },
     sh = { "shfmt" },

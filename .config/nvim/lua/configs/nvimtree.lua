@@ -2,6 +2,7 @@ dofile(vim.g.base46_cache .. "nvimtree")
 
 local function on_attach(bufnr)
   local api = require "nvim-tree.api"
+  local actions = require "configs.explorer_actions"
 
   local function map_options(description)
     return {
@@ -16,6 +17,35 @@ local function on_attach(bufnr)
   api.map.on_attach.default(bufnr)
   vim.keymap.set({ "n", "x" }, "d", api.fs.trash, map_options "Move to trash")
   vim.keymap.set({ "n", "x" }, "D", api.fs.remove, map_options "Delete permanently")
+
+  local function selected_path()
+    local node = api.tree.get_node_under_cursor()
+    return node and node.absolute_path or nil
+  end
+
+  local function close_tree()
+    api.tree.close()
+  end
+
+  vim.keymap.set("n", "<leader>oa", function()
+    actions.copy_absolute(selected_path())
+  end, map_options "Copy absolute path")
+  vim.keymap.set("n", "<leader>or", function()
+    actions.copy_relative(selected_path())
+  end, map_options "Copy relative path")
+  vim.keymap.set("n", "<leader>os", function()
+    actions.select_for_compare(selected_path())
+  end, map_options "Select for compare")
+  vim.keymap.set("n", "<leader>oc", function()
+    actions.compare_with_selected(selected_path(), close_tree)
+  end, map_options "Compare with selected")
+  vim.keymap.set("n", "<leader>oh", function()
+    actions.compare_with_head(selected_path(), close_tree)
+  end, map_options "Compare with HEAD")
+
+  require("which-key").add {
+    { "<leader>o", group = "File Actions", buffer = bufnr },
+  }
 end
 
 local function tree_width()

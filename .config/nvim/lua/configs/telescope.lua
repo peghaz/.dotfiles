@@ -6,6 +6,23 @@ local fb_utils = require "telescope._extensions.file_browser.utils"
 local Path = require "plenary.path"
 local options = require "nvchad.configs.telescope"
 
+local function selected_path()
+  local entry = action_state.get_selected_entry()
+  if not entry then
+    return nil
+  end
+  if entry.Path and entry.Path.absolute then
+    return entry.Path:absolute()
+  end
+  return entry.path or entry.value
+end
+
+local function with_selected_path(callback)
+  return function(prompt_bufnr)
+    callback(selected_path(), prompt_bufnr)
+  end
+end
+
 local function browser_path(prompt_bufnr)
   local picker = action_state.get_current_picker(prompt_bufnr)
   local path = picker.finder.path
@@ -130,6 +147,13 @@ options.defaults.layout_config.height = 0.85
 options.defaults.layout_config.horizontal.preview_width = 0.58
 
 options.extensions.file_browser = {
+  attach_mappings = function(prompt_bufnr)
+    require("which-key").add {
+      { "<leader>o", group = "File Actions", buffer = prompt_bufnr },
+    }
+
+    return true
+  end,
   cwd_to_path = true,
   grouped = true,
   hidden = {
@@ -161,6 +185,45 @@ options.extensions.file_browser = {
         fb_actions.remove,
         type = "action",
         opts = { desc = "Delete selection permanently" },
+      },
+      ["<leader>oa"] = {
+        with_selected_path(function(path)
+          require("configs.explorer_actions").copy_absolute(path)
+        end),
+        type = "action",
+        opts = { desc = "Copy absolute path" },
+      },
+      ["<leader>or"] = {
+        with_selected_path(function(path)
+          require("configs.explorer_actions").copy_relative(path)
+        end),
+        type = "action",
+        opts = { desc = "Copy relative path" },
+      },
+      ["<leader>os"] = {
+        with_selected_path(function(path)
+          require("configs.explorer_actions").select_for_compare(path)
+        end),
+        type = "action",
+        opts = { desc = "Select for compare" },
+      },
+      ["<leader>oc"] = {
+        with_selected_path(function(path, prompt_bufnr)
+          require("configs.explorer_actions").compare_with_selected(path, function()
+            actions.close(prompt_bufnr)
+          end)
+        end),
+        type = "action",
+        opts = { desc = "Compare with selected" },
+      },
+      ["<leader>oh"] = {
+        with_selected_path(function(path, prompt_bufnr)
+          require("configs.explorer_actions").compare_with_head(path, function()
+            actions.close(prompt_bufnr)
+          end)
+        end),
+        type = "action",
+        opts = { desc = "Compare with HEAD" },
       },
     },
   },
