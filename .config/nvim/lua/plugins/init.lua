@@ -3,15 +3,9 @@ return {
     "stevearc/conform.nvim",
     event = "BufWritePre",
     cmd = "ConformInfo",
-    opts = {
-      formatters_by_ft = {
-        lua = { "stylua" },
-      },
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_format = "fallback",
-      },
-    },
+    opts = function()
+      return require "configs.conform"
+    end,
   },
 
   -- These are some examples, uncomment them if you want to see them work!
@@ -73,6 +67,47 @@ return {
   },
 
   {
+    "lewis6991/gitsigns.nvim",
+    opts = function(_, opts)
+      return require("configs.git").gitsigns(opts)
+    end,
+  },
+
+  {
+    "sindrets/diffview.nvim",
+    cmd = {
+      "DiffviewOpen",
+      "DiffviewClose",
+      "DiffviewFileHistory",
+      "DiffviewToggleFiles",
+      "DiffviewFocusFiles",
+      "DiffviewRefresh",
+    },
+    keys = function()
+      return require("configs.git").diffview_keys
+    end,
+    opts = function()
+      return require("configs.git").diffview
+    end,
+  },
+
+  {
+    "NeogitOrg/neogit",
+    cmd = "Neogit",
+    keys = function()
+      return require("configs.git").neogit_keys
+    end,
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-telescope/telescope.nvim",
+      "sindrets/diffview.nvim",
+    },
+    opts = function()
+      return require("configs.git").neogit
+    end,
+  },
+
+  {
     "jake-stewart/multicursor.nvim",
     branch = "1.0",
     keys = function()
@@ -100,6 +135,33 @@ return {
     end,
   },
 
+  {
+    "tadmccorkle/markdown.nvim",
+    ft = "markdown",
+    opts = function()
+      return require("configs.markdown").options
+    end,
+  },
+
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = "markdown",
+    build = "cd app && npm install",
+    init = function()
+      require("configs.markdown").setup_preview()
+    end,
+  },
+
+  {
+    "lervag/vimtex",
+    tag = "v2.17",
+    lazy = false,
+    init = function()
+      require("configs.latex").setup()
+    end,
+  },
+
   -- test new blink
   -- { import = "nvchad.blink.lazyspec" },
 
@@ -122,6 +184,8 @@ return {
         "dockerfile",
         "toml",
         "bash",
+        "markdown",
+        "markdown_inline",
       },
     },
   },

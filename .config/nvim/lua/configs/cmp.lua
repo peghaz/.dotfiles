@@ -1,6 +1,13 @@
 local cmp = require "cmp"
 local options = require "nvchad.configs.cmp"
 
+options.completion = vim.tbl_deep_extend("force", options.completion or {}, {
+  autocomplete = {
+    cmp.TriggerEvent.TextChanged,
+  },
+  keyword_length = 1,
+})
+
 options.enabled = function()
   if vim.bo.buftype ~= "prompt" then
     return true
@@ -15,6 +22,17 @@ cmp.setup.filetype("dap-repl", {
     { name = "dap" },
   }, {
     { name = "buffer" },
+  }),
+})
+
+cmp.setup.filetype({ "c", "cpp" }, {
+  completion = options.completion,
+  sources = cmp.config.sources({
+    { name = "nvim_lsp", priority = 1000 },
+    { name = "luasnip", priority = 750 },
+  }, {
+    { name = "buffer", keyword_length = 2 },
+    { name = "async_path" },
   }),
 })
 

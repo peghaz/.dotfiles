@@ -1,5 +1,8 @@
 require("nvchad.configs.lspconfig").defaults()
 
+vim.lsp.config("clangd", require "configs.clangd")
+vim.lsp.config("texlab", require("configs.latex").lsp)
+
 local servers = {
   -- web
   "html",
@@ -12,6 +15,9 @@ local servers = {
   "gopls",
   -- python
   "pyright",
+  -- prose
+  "marksman",
+  "texlab",
   -- docker
   "dockerls",
   "docker_compose_language_service",
