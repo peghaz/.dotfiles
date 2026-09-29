@@ -113,6 +113,20 @@ return {
   },
 
   {
+    "folke/trouble.nvim",
+    cmd = "Trouble",
+    dependencies = {
+      "nvim-tree/nvim-web-devicons",
+    },
+    keys = function()
+      return require("configs.trouble").keys
+    end,
+    opts = function()
+      return require("configs.trouble").options
+    end,
+  },
+
+  {
     "Vigemus/iron.nvim",
     ft = "python",
     cmd = { "IronRepl", "IronRestart", "IronFocus", "IronHide", "IronSend" },

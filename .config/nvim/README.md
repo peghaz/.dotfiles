@@ -762,7 +762,13 @@ The default theme is `github_dark`; its paired light theme is `github_light`.
 | `]D` / `[D` | Normal | Go to the last/first diagnostic |
 | `<C-w>d` | Normal | Show the diagnostic under the cursor |
 | `<leader>ds` | Normal | Put diagnostics in the location list |
+| `<leader>qq` | Normal | Toggle project-wide diagnostics in the Problems panel |
+| `<leader>qb` | Normal | Toggle current-buffer diagnostics in the Problems panel |
+| `<leader>ql` | Normal | Toggle the location list in the Problems panel |
+| `<leader>qf` | Normal | Toggle the quickfix list in the Problems panel |
 | `<leader>wa` / `<leader>wr` / `<leader>wl` | Normal | Add/remove/list workspace folders |
+
+Inline diagnostic text is constrained by the editor width and may be clipped near the right edge. Press `<C-w>d` for the complete diagnostic at the cursor, or open the [Trouble](https://github.com/folke/trouble.nvim) Problems panel with `<leader>qq`. The panel opens below the editor and renders multi-line messages. Inside it, use `j`/`k` to move, `<CR>` to jump to an item, `p` to preview, `<C-s>`/`<C-v>` to open in a horizontal/vertical split, `?` for contextual help, and `q` to close it. `<leader>q` is only the Problems shortcut group; `<leader>x` remains the immediate shortcut for closing the current buffer.
 
 ### Markdown and LaTeX
 
@@ -859,7 +865,7 @@ This comparison covers stock VS Code workflows. It cannot account for every exte
 | Markdown authoring and preview | Implemented | Markdown-aware editing, TOC/list/task operations, link navigation, and synchronized browser preview are integrated. |
 | LaTeX authoring and PDF preview | Implemented | TexLab, VimTeX, continuous latexmk builds, formatting, errors, Zathura live preview, and SyncTeX are integrated. |
 | Multi-cursor editing and themes | Implemented | Next-occurrence selection and GitHub light/dark themes are configured. |
-| Problems panel | Partial | Diagnostics and location lists exist, but there is no persistent VS Code-style Problems panel. |
+| Problems panel | Implemented | Trouble provides project and buffer diagnostics plus location and quickfix lists in a persistent bottom panel with multi-line messages. |
 | Symbols and breadcrumbs | Partial | `gO` lists document symbols, but there is no persistent outline or breadcrumb bar. |
 | Tests | Partial | CTest is integrated through CMake; there is no unified test explorer or Python test integration. |
 | Tasks | Partial | CMake tasks are covered, but there is no general task runner or `.vscode/tasks.json` workflow. |
@@ -873,7 +879,7 @@ This comparison covers stock VS Code workflows. It cannot account for every exte
 
 These recommendations are not installed by the Markdown and LaTeX changes above.
 
-1. Complete the editor-navigation layer: map Telescope's command picker, add [Trouble](https://github.com/folke/trouble.nvim) for a Problems panel, [Aerial](https://github.com/stevearc/aerial.nvim) for an outline, and [grug-far](https://github.com/MagicDuck/grug-far.nvim) for project-wide replace with previews.
+1. Complete the editor-navigation layer: map Telescope's command picker, add [Aerial](https://github.com/stevearc/aerial.nvim) for an outline, and add [grug-far](https://github.com/MagicDuck/grug-far.nvim) for project-wide replace with previews.
 2. Add project workflows: [persistence.nvim](https://github.com/folke/persistence.nvim) for session restore, [Overseer](https://github.com/stevearc/overseer.nvim) for general tasks, and [Neotest](https://github.com/nvim-neotest/neotest) for a unified test explorer.
 3. Add Neovim-native editing power: [Flash](https://github.com/folke/flash.nvim) for rapid visible-text jumps, [nvim-surround](https://github.com/kylechui/nvim-surround) for editing quotes/brackets/tags, [Tree-sitter textobjects](https://github.com/nvim-treesitter/nvim-treesitter-textobjects) for syntax-aware selections and motions, [treesitter-context](https://github.com/nvim-treesitter/nvim-treesitter-context) for sticky code context, and [Undotree](https://github.com/mbbill/undotree) for visual persistent undo history.
 

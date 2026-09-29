@@ -14,6 +14,7 @@ function M.options(_, options)
     { "<leader>C", group = "CMake" },
     { "<leader>d", group = "Debug" },
     { "<leader>g", group = "Git" },
+    { "<leader>q", group = "Problems" },
     { "<leader>R", group = "Python REPL" },
     { "<leader>l", group = "LaTeX", cond = filetype_is "tex" },
     { "<leader>m", group = "Markdown", cond = filetype_is "markdown" },
