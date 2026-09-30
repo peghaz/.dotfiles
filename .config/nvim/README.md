@@ -578,6 +578,8 @@ Gitsigns displays added, changed, and deleted line indicators beside Git-managed
 | `<leader>gt` | Search files shown by Git status |
 | `<leader>cm` | Search Git commits |
 
+Inside the `<leader>gt` Telescope picker, press `<Esc>` to enter Normal mode, then use `s` to stage the selected file, `u` to unstage it, or `<Tab>` to toggle its staged state. Press `x` to discard all changes to the selected file after confirmation. Untracked and newly added files are moved to the system trash with `trash-put`; tracked files are restored to `HEAD`. Conflicts, renames, and copies must be handled in Neogit or Diffview so their multi-file state is not discarded accidentally. Use `<CR>` to open a file and `?` to see the complete picker-local mappings.
+
 Inside Neogit, use `s` to stage the item under the cursor, `S` to stage all unstaged items, `u` to unstage the item, `U` to unstage all items, `x` to discard after confirmation, and `<Tab>` to expand or collapse sections. Press `c` to open commit actions and then `c` again to create a commit. In the commit editor, write the message and press `<C-c><C-c>` to submit or `<C-c><C-k>` to abort. Press `P` for push actions, `p` for pull actions, `?` for contextual help, and `q` to close Neogit.
 
 Inside Diffview, `<Tab>` and `<S-Tab>` move between changed files, `[c` and `]c` move between diff hunks, and `g?` opens contextual help. Diffview uses a temporary native tab-page workspace; close it with `<leader>gD` or `:DiffviewClose` rather than the normal file-buffer shortcut.
@@ -827,6 +829,8 @@ Inline diagnostic text is constrained by the editor width and may be clipped nea
 | `<leader>gc` | Normal | Open the Neogit commit workflow |
 | `<leader>gd` / `<leader>gD` | Normal | Open / close Diffview |
 | `<leader>gh` / `<leader>gH` | Normal | Show file / repository history |
+| `s` / `u` / `x` | Telescope Git status, Normal | Stage / unstage / discard the selected file |
+| `<Tab>` | Telescope Git status | Toggle the selected file's staged state |
 | `]c` / `[c` | Git buffer or Diffview | Go to the next/previous changed hunk |
 | `<leader>gp` | Git buffer | Preview the current hunk |
 | `<leader>gs` / `<leader>gu` | Git buffer | Stage / unstage the current hunk or selection |
@@ -1030,6 +1034,7 @@ Start with `:Lazy sync`, restart Neovim, and run `:checkhealth`. The downloaded 
 | `lua/configs/multicursor.lua` | VS Code-style next-match multicursor behavior |
 | `lua/configs/nvimtree.lua` | Floating project-tree layout and rendering |
 | `lua/configs/telescope.lua` | Centered pickers and file-browser behavior |
+| `lua/configs/telescope_git.lua` | Telescope Git-status staging, unstaging, and safe discard actions |
 | `lua/configs/lazy.lua` | lazy.nvim UI and performance settings |
 
 ## Credits

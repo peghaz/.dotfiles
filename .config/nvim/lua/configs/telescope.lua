@@ -147,10 +147,34 @@ options.defaults.layout_config.height = 0.85
 options.defaults.layout_config.horizontal.preview_width = 0.58
 
 options.extensions.file_browser = {
-  attach_mappings = function(prompt_bufnr)
+  attach_mappings = function(prompt_bufnr, map)
     require("which-key").add {
       { "<leader>o", group = "File Actions", buffer = prompt_bufnr },
     }
+
+    map({ "i", "n" }, "<C-f>", grep_in_browser, { desc = "Search in current folder" })
+    map({ "i", "n" }, "<C-b>", fb_actions.toggle_browser, { desc = "Toggle file/folder browser" })
+    map("n", "d", trash_in_browser, { desc = "Move selection to trash" })
+    map("n", "D", fb_actions.remove, { desc = "Delete selection permanently" })
+    map("n", "<leader>oa", with_selected_path(function(path)
+      require("configs.explorer_actions").copy_absolute(path)
+    end), { desc = "Copy absolute path" })
+    map("n", "<leader>or", with_selected_path(function(path)
+      require("configs.explorer_actions").copy_relative(path)
+    end), { desc = "Copy relative path" })
+    map("n", "<leader>os", with_selected_path(function(path)
+      require("configs.explorer_actions").select_for_compare(path)
+    end), { desc = "Select for compare" })
+    map("n", "<leader>oc", with_selected_path(function(path, current_prompt_bufnr)
+      require("configs.explorer_actions").compare_with_selected(path, function()
+        actions.close(current_prompt_bufnr)
+      end)
+    end), { desc = "Compare with selected" })
+    map("n", "<leader>oh", with_selected_path(function(path, current_prompt_bufnr)
+      require("configs.explorer_actions").compare_with_head(path, function()
+        actions.close(current_prompt_bufnr)
+      end)
+    end), { desc = "Compare with HEAD" })
 
     return true
   end,
@@ -168,66 +192,12 @@ options.extensions.file_browser = {
     height = 0.85,
     preview_width = 0.58,
   },
-  mappings = {
-    i = {
-      ["<C-f>"] = grep_in_browser,
-      ["<C-b>"] = fb_actions.toggle_browser,
-    },
-    n = {
-      ["<C-f>"] = grep_in_browser,
-      ["<C-b>"] = fb_actions.toggle_browser,
-      ["d"] = {
-        trash_in_browser,
-        type = "action",
-        opts = { desc = "Move selection to trash" },
-      },
-      ["D"] = {
-        fb_actions.remove,
-        type = "action",
-        opts = { desc = "Delete selection permanently" },
-      },
-      ["<leader>oa"] = {
-        with_selected_path(function(path)
-          require("configs.explorer_actions").copy_absolute(path)
-        end),
-        type = "action",
-        opts = { desc = "Copy absolute path" },
-      },
-      ["<leader>or"] = {
-        with_selected_path(function(path)
-          require("configs.explorer_actions").copy_relative(path)
-        end),
-        type = "action",
-        opts = { desc = "Copy relative path" },
-      },
-      ["<leader>os"] = {
-        with_selected_path(function(path)
-          require("configs.explorer_actions").select_for_compare(path)
-        end),
-        type = "action",
-        opts = { desc = "Select for compare" },
-      },
-      ["<leader>oc"] = {
-        with_selected_path(function(path, prompt_bufnr)
-          require("configs.explorer_actions").compare_with_selected(path, function()
-            actions.close(prompt_bufnr)
-          end)
-        end),
-        type = "action",
-        opts = { desc = "Compare with selected" },
-      },
-      ["<leader>oh"] = {
-        with_selected_path(function(path, prompt_bufnr)
-          require("configs.explorer_actions").compare_with_head(path, function()
-            actions.close(prompt_bufnr)
-          end)
-        end),
-        type = "action",
-        opts = { desc = "Compare with HEAD" },
-      },
-    },
-  },
 }
+
+options.pickers = options.pickers or {}
+options.pickers.git_status = vim.tbl_deep_extend("force", options.pickers.git_status or {}, {
+  attach_mappings = require("configs.telescope_git").attach_mappings,
+})
 
 if not vim.tbl_contains(options.extensions_list, "file_browser") then
   options.extensions_list[#options.extensions_list + 1] = "file_browser"
