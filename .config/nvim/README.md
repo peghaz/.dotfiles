@@ -207,7 +207,7 @@ There are two complementary file-browser views. Telescope is the primary, keyboa
 | `<leader>e` | Open the centered Telescope file browser |
 | `<C-n>` | Toggle the floating project tree |
 
-In the Telescope browser, type to filter names and press Enter to open the selected file or directory. Backspace moves to the parent directory. `<C-b>` toggles between browsing files and fuzzy-searching directories, `<C-h>` toggles hidden entries, and `<C-f>` searches file contents beneath the directory currently being browsed. Press `?` from Normal mode to see every available action.
+In the Telescope browser, type to filter names and press Enter to open the selected file or directory. For Vim-style navigation, press `<Esc>` to enter Normal mode, use `j`/`k` to move through entries, `l` to enter a directory or open a file, and `h` to return to the parent directory. Backspace also moves to the parent directory. `<C-b>` toggles between browsing files and fuzzy-searching directories, `<C-h>` toggles hidden entries, and `<C-f>` searches file contents beneath the directory currently being browsed. Press `?` from Normal mode to see every available action.
 
 The browser also supports filesystem operations from Normal mode: `c` creates, `r` renames, `m` moves, and `y` copies. Press `d` to move an item to the Linux trash with `trash-put`; press `D` only when you want to delete it permanently. Both actions ask for confirmation. Use `<Tab>` and `<S-Tab>` to build a multi-selection before applying an operation. The `<leader>o` combinations below copy paths and compare the selected entry without opening another menu.
 

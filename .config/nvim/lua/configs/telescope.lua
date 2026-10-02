@@ -154,6 +154,9 @@ options.extensions.file_browser = {
 
     map({ "i", "n" }, "<C-f>", grep_in_browser, { desc = "Search in current folder" })
     map({ "i", "n" }, "<C-b>", fb_actions.toggle_browser, { desc = "Toggle file/folder browser" })
+    map("n", "h", fb_actions.goto_parent_dir, { desc = "Go to parent directory" })
+    map("n", "l", actions.select_default, { desc = "Open file or directory" })
+    map("n", "<C-h>", fb_actions.toggle_hidden, { desc = "Toggle hidden entries" })
     map("n", "d", trash_in_browser, { desc = "Move selection to trash" })
     map("n", "D", fb_actions.remove, { desc = "Delete selection permanently" })
     map("n", "<leader>oa", with_selected_path(function(path)
