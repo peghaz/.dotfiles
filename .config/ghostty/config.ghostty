@@ -8,6 +8,7 @@
 # THEME / APPEARANCE
 # ------------------------------------------------------------
 #
+#
 
 # Allow nautilus to launch a new Ghostty window
 gtk-single-instance = false
@@ -21,8 +22,8 @@ background-opacity = 0.98
 background-blur = true
 
 # Compact padding to give terminal applications more usable space
-window-padding-x = 4
-window-padding-y = 4
+window-padding-x = 2
+window-padding-y = 2
 window-padding-balance = true
 
 # Make lines slightly less cramped
