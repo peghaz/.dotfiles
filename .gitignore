@@ -4,3 +4,5 @@
 
 .config/uv/uv-receipt.json
 nvim.log
+.codex/
+!.codex/AGENTS.md
